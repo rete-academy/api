@@ -86,7 +86,7 @@ const createNew = async function(req, res) {
         });
 
         log.debug('User created, code created, email sent');
-        defaultResponse(req, res, 201, createdUser);
+        defaultResponse(req, res, 201, 'Check email inbox');
     } catch (error) {
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
