@@ -1,9 +1,10 @@
 'use strict';
 
-// const fs = require('fs-extra');
 const randomize = require('randomatic');
 const log = require('library/logger');
 const User = require('mongo/model/user');
+const config = require('config');
+const emailService = require('library/email');
 // const Image = require('mongo/model/image');
 const confirmationCode = require('mongo/model/confirmation_code');
 // const PasswordResetToken = require('mongo/model/password');
@@ -54,7 +55,7 @@ const upload = async function(req, res) {
 const createNew = async function(req, res) {
     try {
         let user = req.body;
-        user.username = user.email.split('@').shift();
+        if (!user.username) user.username = user.email.split('@').shift();
         const usedUser = await User.findOne({ username: user.username });
         if (usedUser) user.username = user.username.concat(randomize('Aa', 10));
 
@@ -70,9 +71,21 @@ const createNew = async function(req, res) {
             email: createdUser.email,
         });
 
-        console.log(confirm); // !!! REMOVE IT AFTER FINISH EMAIL FUNC
+        await emailService.sendMail({
+            from: config.email.noreply,
+            to: user.email,
+            subject: config.email.welcome.subject,
+            text: config.email.welcome.text,
+            placeholders: {
+                TITLE: config.email.welcome.subject,
+                CONTENT: config.email.welcome.content,
+                LINK: config.default.webUrl + '/confirm/' + confirm.code,
+                CODE: confirm.code,
+            },
+            type: 'welcome',
+        });
 
-        log.debug('User created and confirmation code created.');
+        log.debug('User created, code created, email sent');
         defaultResponse(req, res, 201, createdUser);
     } catch (error) {
         log.error(`${error.name}: ${error.message}`);

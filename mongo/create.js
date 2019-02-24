@@ -10,10 +10,10 @@ const log = require('library/logger');
 
 async function createFirstUser() {
     try {
-        const foundUser = await User.findByUsername(config.default.username);
+        const foundUsers = await User.find();
     
-        if (foundUser) {
-            log.debug('Found default user, stop.');
+        if (foundUsers.length > 0) {
+            log.debug('Found some user(s), stop.');
             return;
         }
 
@@ -33,20 +33,19 @@ async function createFirstUser() {
 
 async function createFirstClient() {
     try {
-        const foundClient = await Client.findById(config.default.clientId);
-        if (foundClient) {
-            log.debug('Found default client, stop.');
+        const foundClients = await Client.find();
+        if (foundClients) {
+            log.debug('Found some client(s), stop.');
             return;
         }
         
         log.debug('Creating new client');
-        const newClient = await Client.createNew({
+        return await Client.createNew({
             client_id: randomize('aA0', 32),
             client_secret: randomize('aA0', 64),
         });
 
-        console.log(JSON.stringify(newClient));
-        return newClient;
+        // console.log(JSON.stringify(newClient));
     } catch(error) {
         log.error(`${error.name}: ${error.message}`);
         throw error;

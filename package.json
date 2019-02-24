@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/sangdth/template-api#README",
   "dependencies": {
+    "@sentry/node": "^4.6.3",
     "app-module-path": "^2.2.0",
     "aws-sdk": "^2.391.0",
     "body-parser": "^1.18.2",

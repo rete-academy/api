@@ -71,7 +71,7 @@ const enroll = async function(req, res) {
         });
         defaultResponse(req, res, 200, updated);
     } catch(error) { 
-        log.error(`${error.name}: ${error.message}`);
+        log.error(`[Enroll controller] ${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
     }
 };
@@ -103,7 +103,7 @@ const unenroll = async function(req, res) {
         });
         defaultResponse(req, res, 200, updated);
     } catch(error) { 
-        log.error(`${error.name}: ${error.message}`);
+        log.error(`[Unenroll controller] ${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
     }
 };
@@ -148,7 +148,6 @@ const addSprints = async function(req, res) {
 
 const removeSprints = async function(req, res) {
     log.silly('Start removing sprints from path...');
-    console.log(res.body)
     try {
         const updated = await Path.removeSprints(req.params.id, req.body);
         log.debug('Path was updated');

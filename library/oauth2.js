@@ -5,6 +5,7 @@ const crypto = require('crypto');
 
 const config = require('config');
 // const log = require('library/logger');
+const { isEmail } = require('library/utils');
 const User = require('mongo/model/user');
 const Client = require('mongo/model/client');
 const AuthorizationCode = require('mongo/model/authorization_code');
@@ -117,8 +118,11 @@ const generateTokens = function ({ user, client }, done) {
     });
 };
 
-server.exchange(oauth2orize.exchange.password(function (client, username, password, scope, done) {
-    User.findOne({ username }).then(function (user) {
+server.exchange(oauth2orize.exchange.password(function (client, login, password, scope, done) {
+    let query;
+    if (isEmail(login)) query = { email: login };
+    else query = { username: login };
+    User.findOne(query).then(function (user) {
         if (!user || !user.checkPassword(password)) return done(null, false);
         generateTokens({ user, client }, done);
     }, function (error) {

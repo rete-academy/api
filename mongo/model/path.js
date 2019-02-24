@@ -29,7 +29,7 @@ modelInstance.findAll = async function(query) {
             .sort({ name: 1 })
             .populate('sprints')
             .populate('students');
-    } catch(error) { 
+    } catch(error) {
         log.error(`${error.name}: ${error.message}`);
         throw error;
     }
@@ -63,7 +63,7 @@ modelInstance.enroll = async function(id, doc) {
             .sort({ name: 1 })
             .populate('sprints');
     } catch (error) {
-        log.error(`${error.name}: ${error.message}`);
+        log.error(`[Enroll model] ${error.name}: ${error.message}`);
         throw error;
     }
 };
@@ -83,7 +83,7 @@ modelInstance.unenroll = async function(id, doc) {
             .sort({ name: 1 })
             .populate('sprints');
     } catch (error) {
-        log.error(`${error.name}: ${error.message}`);
+        log.error(`[Unenroll model] ${error.name}: ${error.message}`);
         throw error;
     }
 };
@@ -154,12 +154,10 @@ modelInstance.removeSprints = async function(id, doc) {
     try {
         log.silly('Removing sprints from ' + modelName + ' id ' + id);
         const data = isArray(doc.id) ? doc.id : [doc.id];
-        console.log('id need to be removed', doc);
         const found = await modelInstance.findOne({ _id: id });
         const sprintIds = found.sprints.map(i => i.toString());
         // Note: remove mutates the origin array
         remove(sprintIds, (j) => data.find(k => j === k));
-        console.log('sprints id after remove', sprintIds);
         if (found.meta && found.meta.version) { found.meta.version += 1; }
         return await modelInstance.findOneAndUpdate(
             { _id: id },

@@ -4,10 +4,17 @@ require('dotenv').config();
 require('app-module-path').addPath(__dirname);
 
 const app  = require('express')();
+const Sentry = require('@sentry/node');
 const session = require('express-session');
 const helmet = require('helmet')();
 const bodyParser = require('body-parser');
 const passport = require('passport');
+const config = require('config');
+
+Sentry.init({ dsn: 'https://7a23e0719d964b6ea1252e9912d5e0f0@sentry.io/1401406' });
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.errorHandler());
+
 const log = require('library/logger');
 
 require('library/passport')(passport);
@@ -64,7 +71,7 @@ let port = process.env.PORT || 3000;
 
 // start HTTP server
 server.listen(port, () => {
-    log.info('App runs on: http://localhost:' + port);
+    log.info(`App runs on: ${config.default.baseUrl}:${port}`);
 }).on('error', (err) => {
     if (err.errno === 'EADDRINUSE') {
         log.error(err);

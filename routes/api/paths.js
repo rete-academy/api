@@ -32,7 +32,7 @@ module.exports = function (passport) {
     router.put('/:id/add-sprints', auth, addSprints);
     router.put('/:id/remove-sprints', auth, removeSprints);
     router.put('/:id/enroll', auth, enroll);
-    router.delete('/:id/enroll', auth, unenroll);
+    router.put('/:id/unenroll', auth, unenroll);
 
     return router;
 };

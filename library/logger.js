@@ -5,8 +5,7 @@ const config = require('config');
 require('winston-daily-rotate-file');
 
 const logger = createLogger({
-    level: process.env.NODE_ENV === 'production'
-        ? config.debug.minLevel : config.debug.maxLevel,
+    level: config.log.maxLevel,
     format: format.combine(
         format.colorize(),
         format.simple(),

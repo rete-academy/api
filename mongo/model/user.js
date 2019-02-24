@@ -3,36 +3,25 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const randomize = require('randomatic');
-// const config = require('config');
 const log = require('library/logger');
 const modelName = require('path').basename(__filename).slice(0, -3);
 
-const options = {
-    toObject: {
-        transform: function(doc, ret) {
-            delete ret.__v;
-            delete ret.hashedPassword;
-            delete ret.salt;
-            if (ret.createdTime) ret.createdTime = ret.createdTime.getTime();
-            if (ret.updatedTime) ret.updatedTime = ret.updatedTime.getTime();
-            return ret;
-        }
-    },
-    toJSON: {
-        transform: function(doc, ret) {
-            delete ret.__v;
-            delete ret.hashedPassword;
-            delete ret.salt;
-            if (ret.createdTime) ret.createdTime = ret.createdTime.getTime();
-            if (ret.updatedTime) ret.updatedTime = ret.updatedTime.getTime();
-            return ret;
-        }
-    },
-    minimize: false,
-};
+const refine = function(doc, ret) {
+    delete ret.__v;
+    delete ret.hashedPassword;
+    delete ret.salt;
+    if (ret.createdTime) ret.createdTime = ret.createdTime.getTime();
+    if (ret.updatedTime) ret.updatedTime = ret.updatedTime.getTime();
+    return ret;
+}
 
 const schemaDefinition = require('../schema/' + modelName);
-const schemaInstance = mongoose.Schema(schemaDefinition, options);
+const schemaInstance = mongoose.Schema(schemaDefinition, {
+    collection: `${modelName}s`,
+    toObject: {transform: refine},
+    toJSON: {transform: refine},
+    minimize: false
+});
 
 schemaInstance.methods.encryptPassword = function(password) {
     return crypto.createHmac('sha1', this.salt.toString())
@@ -108,25 +97,10 @@ modelInstance.findByEmail = async function(email) {
 modelInstance.createNew = async function(user) {
     try {
         log.silly('Start create a new ' + modelName);
-        user.password = randomize('aA0!', 32);
+        user.password = randomize('aA0!', 64);
         user.created_time = Date.now();
         user.updated_time = Date.now();
-        const newUser = await modelInstance.create(user);
-        /*
-        const sentEmail = await emailService.sendMail({
-            from: config.email.noreply,
-            to: user.email,
-            subject: 'Welcome',
-            text: 'Welcome to example site',
-            placeholders: {
-                TITLE: 'Welcome to example site',
-                PASS: user.password,
-            },
-            type: 'welcome',
-        });
-        log.debug(sentEmail);
-        */
-        return newUser;
+        return await modelInstance.create(user);
     } catch (error) {
         log.error(error.message);
         throw error;

@@ -4,23 +4,25 @@ module.exports = {
     default: {
         username: 'sangdth',
         email: 'sangdth@gmail.com',
-        baseUrl: 'http://example.com',
-        clientName: 'Default Client',
-        clientId: 'gi4ylF2Pk',
-        clientSecret: 'pYEpKMZK5bdaf14Ta090n10wi8uy5bAij8',
+        baseUrl: 'https://api.rete.academy',
+        webUrl: 'https://www.rete.academy',
     },
 
-    debug: {
+    log: {
         // error, warn, info, verbose, debug, silly
-        minLevel: 'error',
         maxLevel: 'info',
     },
 
     email: {
-        admin: 'admin@example.com',
-        bcc: 'bcc@example.com',
-        confirmation: 'confirm@example.com',
-        noreply: 'noreply@example.com',
+        admin: 'admin@rete.academy',
+        bcc: 'sangdth@gmail.com',
+        confirmation: 'confirm@rete.academy',
+        noreply: 'noreply@rete.academy',
+        welcome: {
+            subject: 'Welcome to Rete Academy',
+            text: 'Welcome to Rete Academy',
+            content: 'Here is the content of the welcome email. Edit in config.',
+        },
     },
 
     limit: {

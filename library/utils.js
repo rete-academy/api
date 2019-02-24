@@ -1,6 +1,6 @@
 'use strict';
 
-const { maxBy } = require('lodash');
+// const { maxBy } = require('lodash');
 
 const defaultResponses = {
     res_200: {success: true, message: 'OK'},
@@ -15,6 +15,9 @@ const defaultResponses = {
     res_500: {success: false, message: 'Internal Server Error.'}
 };
 
+function authoriseUser() {}
+function notifyAdmin() {}
+
 function isObject(value) {
     return value && typeof value === 'object' && value.constructor === Object;
 }
@@ -23,7 +26,9 @@ function isArray(value) {
     return value && typeof value === 'object' && value.constructor === Array;
 }
 
-function authoriseUser() {}
+function isEmail(str) {
+    return /^[a-zA-Z0-9.!#$%&’*+=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(str);
+}
 
 function getDomainFromUrl(url, port) {
     let domain = url.replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
@@ -38,8 +43,6 @@ function getDomainFromUrl(url, port) {
     }
     return domain;
 }
-
-function notifyAdmin() {}
 
 function promiseRejectWithError(code, msg, reference) {
     let error = new Error(msg || '');
@@ -91,10 +94,6 @@ function slugify(str) {
 
 function filterPathData(auth, results) {
     const data = JSON.parse(JSON.stringify(results));
-    // Only admin can see students info
-    if (auth.role.includes(0)) {
-        return data;
-    }
 
     // otherwise, remove students info out of results
     if (auth.client_id || !auth.role.includes(0)) {
@@ -105,6 +104,11 @@ function filterPathData(auth, results) {
         } else {
             delete data.students;
         }
+        return data;
+    }
+
+    // Only admin can see students info
+    if (auth.role.includes(0)) {
         return data;
     }
 
@@ -133,5 +137,6 @@ module.exports = {
     slugify,
     strengthCheck,
     isArray,
+    isEmail,
     isObject,
 };

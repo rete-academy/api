@@ -4,15 +4,12 @@ module.exports = {
     default: {
         username: 'sangdth',
         email: 'sangdth@gmail.com',
-        baseUrl: 'http://example.com',
-        clientName: 'Default Client',
-        clientId: 'gi4ylF2Pk',
-        clientSecret: 'pYEpKMZK5bdaf14Ta090n10wi8uy5bAij8',
+        baseUrl: 'http://localhost',
+        webUrl: 'http://localhost:8080',
     },
 
-    debug: {
+    log: {
         // error, warn, info, verbose, debug, silly
-        minLevel: 'error',
         maxLevel: 'silly',
     },
 
@@ -21,6 +18,11 @@ module.exports = {
         bcc: 'bcc@example.com',
         confirmation: 'confirm@example.com',
         noreply: 'noreply@example.com',
+        welcome: {
+            subject: 'Welcome to Rete Academy',
+            text: 'Welcome to Rete Academy',
+            content: 'Here is the content of the welcome email. Edit in config.',
+        },
     },
 
     limit: {
