@@ -56,8 +56,7 @@ module.exports = function (app, passport) {
 
     const limiterOauth = new RateLimit(optionsOauth);
     const limiterApi = new RateLimit(optionsApi);
-
-    app.options('*', cors()); // Include before other routes
+    app.options('*', cors({ origin: config.default.webUrl }));
     app.use('/oauth/', limiterOauth, require('./oauth')(passport));
     app.use('/api/', limiterApi, require('./api')(passport));
 };

@@ -124,14 +124,16 @@ const updateProgress = async function() {
 const confirmEmail = async function(req, res) {
     try {
         const found = await confirmationCode.findByCode(req.params.code);
-        if (!found || confirmationCode.isExpired(found)) {
-            return new Error('Confirmation code used, expired or not found.');
+        if (found.length <= 0 || confirmationCode.isExpired(found[0])) {
+            // return new Error('Confirmation code used, expired or not found.');
+            defaultResponse(req, res, 404, 'Confirmation code invalid');
+            return;
         }
         const confirmedUser = await User.findOneAndUpdate(
-            { _id: found.userId },
+            { _id: found[0].userId },
             {
                 $set: {
-                    email: found.email,
+                    email: found[0].email,
                     updatedTime: Date.now(),
                     'meta.confirm': true ,
                 },

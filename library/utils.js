@@ -94,9 +94,11 @@ function slugify(str) {
 
 function filterPathData(auth, results) {
     const data = JSON.parse(JSON.stringify(results));
-
+    // Only admin can see students info
+    if (auth && auth.role && auth.role.includes(0)) {
+        return data;
+    } else {
     // otherwise, remove students info out of results
-    if (auth.client_id || !auth.role.includes(0)) {
         if (isArray(data)) {
             for (let obj of data) {
                 delete obj.students;
@@ -107,12 +109,6 @@ function filterPathData(auth, results) {
         return data;
     }
 
-    // Only admin can see students info
-    if (auth.role.includes(0)) {
-        return data;
-    }
-
-    return 'Not allowed';
 }
 
 function filterUserData(auth, results) {

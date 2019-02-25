@@ -4,6 +4,7 @@ require('dotenv').config();
 require('app-module-path').addPath(__dirname);
 
 const app  = require('express')();
+const cors = require('cors');
 const Sentry = require('@sentry/node');
 const session = require('express-session');
 const helmet = require('helmet')();
@@ -21,15 +22,10 @@ require('library/passport')(passport);
 require('mongo/db');
 
 app.use(helmet);
-
-app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-});
+app.use(cors({ origin: config.default.webUrl }));
 
 const sessOptions = {
-    secret: process.env.APP_SECRET,
+    secret: process.env.CLIENT_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {}

@@ -9,7 +9,6 @@ const log = require('library/logger');
 const modelName = require('path').basename(__filename).slice(0, -3);
 
 const refine = function (doc, ret) {
-    ret.meta.students = doc.students.length;
     delete ret._id;
     delete ret.__v;
     return ret;
@@ -22,8 +21,9 @@ const schemaInstance = mongoose.Schema(schemaDefinition, {
     toJSON: {transform: refine},
     minimize: false
 });
-schemaInstance.index({ code: 1, userId: 1 });
 const modelInstance = mongoose.model(modelName, schemaInstance);
+
+schemaInstance.index({ userId: 1 });
 
 modelInstance.findAll = async function(query) {
     try {
@@ -37,8 +37,10 @@ modelInstance.findAll = async function(query) {
 
 modelInstance.findByCode = async function(code) {
     try {
-        log.silly('Finding code ' + modelName);
-        return await modelInstance.findOne({ code });
+        log.silly('Finding code ' + code);
+        // return await modelInstance.find({ code: code })
+        //     .limit(1).maxTimeMS(1000);
+        return await modelInstance.find({ code: code }).exec();
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         throw error;
