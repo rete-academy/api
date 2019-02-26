@@ -97,7 +97,7 @@ modelInstance.findByEmail = async function(email) {
 modelInstance.createNew = async function(user) {
     try {
         log.silly('Start create a new ' + modelName);
-        user.password = randomize('aA0!', 64);
+        // user.password = randomize('aA0!', 64);
         user.created_time = Date.now();
         user.updated_time = Date.now();
         return await modelInstance.create(user);
