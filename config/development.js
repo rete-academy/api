@@ -4,8 +4,8 @@ module.exports = {
     default: {
         username: 'sangdth',
         email: 'sangdth@gmail.com',
-        baseUrl: 'http://localhost',
-        webUrl: 'http://localhost:8080',
+        baseUrl: 'http://localhost:8000',
+        webUrl: 'http://localhost:3000',
     },
 
     log: {

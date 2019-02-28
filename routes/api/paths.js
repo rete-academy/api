@@ -14,12 +14,14 @@ const {
     removeSprints,
 } = require('controllers/paths');
 
+/*
 router.use(function(req, res, next) {
     req.body.client_id = process.env.CLIENT_ID;
     req.body.client_secret = process.env.CLIENT_SECRET;
 
     next()
 });
+*/
 
 module.exports = function (passport) {
     let authClient = passport.authenticate(['bearer', 'client-basic'], { session: false });

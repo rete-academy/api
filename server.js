@@ -63,11 +63,11 @@ app.use(function (err, req, res) {
 });
 
 let server = require('http').createServer(app);
-let port = process.env.PORT || 3000;
+let port = process.env.PORT || 8000;
 
 // start HTTP server
 server.listen(port, () => {
-    log.info(`App runs on: ${config.default.baseUrl}:${port}`);
+    log.info(`App runs on: ${config.default.baseUrl}`);
 }).on('error', (err) => {
     if (err.errno === 'EADDRINUSE') {
         log.error(err);
