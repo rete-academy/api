@@ -20,6 +20,11 @@ module.exports = {
         default: 'tutorial',
         // ebook, article, video, tutorial
     },
+    icon: {
+        type: String,
+        default: 'file',
+        // kebab-case, check fontAwesome
+    },
     preferences: {
         type: mongoose.Schema.Types.Mixed,
     },

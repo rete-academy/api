@@ -122,8 +122,26 @@ function filterUserData(auth, results) {
     return 'Not allowed';
 }
 
+function checkRole(user, string) {
+    if (user && user.role && string) {
+        const roleValue = user.role.reduce((i, j) => i * j);
+        switch (string) {
+        case 'admin':
+            if (roleValue === 0) return true;
+            return false;
+        case 'student':
+            if (roleValue > 3) return true;
+            return false;
+        default:
+            return false;
+        }
+    }
+    return false;
+}
+
 module.exports = {
     authoriseUser,
+    checkRole,
     promiseRejectWithError,
     defaultResponse,
     filterPathData,

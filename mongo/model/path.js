@@ -28,6 +28,10 @@ modelInstance.findAll = async function(query) {
         return await modelInstance.find(query)
             .sort({ name: 1 })
             .populate('sprints')
+            .populate({
+                path: 'sprints',
+                populate: { path: 'materials' }
+            })
             .populate('students');
     } catch(error) {
         log.error(`${error.name}: ${error.message}`);
@@ -41,6 +45,10 @@ modelInstance.findSlug = async function(slug) {
         return await modelInstance.findOne({ slug })
             .sort({ name: 1 })
             .populate('sprints')
+            .populate({
+                path: 'sprints',
+                populate: { path: 'materials' }
+            })
             .populate('students');
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);

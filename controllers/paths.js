@@ -1,6 +1,7 @@
 'use strict';
 
 const {
+    checkRole,
     isArray,
     filterPathData,
 } = require('library/utils');
@@ -111,10 +112,14 @@ const unenroll = async function(req, res) {
 const createPath = async function(req, res) {
     log.silly('Start creating a path...');
     try {
-        req.body.slug = slugify(req.body.name);
-        const createdSprint = await Path.createNew(req.body);
-        log.debug('New Path was created');
-        defaultResponse(req, res, 201, createdSprint);
+        if (checkRole(req.user, 'admin')) {
+            req.body.slug = slugify(req.body.name);
+            const createdSprint = await Path.createNew(req.body);
+            log.debug('New Path was created');
+            defaultResponse(req, res, 201, createdSprint);
+        } else {
+            defaultResponse(req, res, 403);
+        }
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -125,9 +130,13 @@ const updatePath = async function(req, res) {
     log.silly('Start updating a path...');
     try {
         delete req.body.sprints;
-        const updated = await Path.updateById(req.params.id, req.body);
-        log.debug('Path was updated');
-        defaultResponse(req, res, 200, updated);
+        if (checkRole(req.user, 'admin')) {
+            const updated = await Path.updateById(req.params.id, req.body);
+            log.debug('Path was updated');
+            defaultResponse(req, res, 200, updated);
+        } else {
+            defaultResponse(req, res, 403);
+        }
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -137,9 +146,13 @@ const updatePath = async function(req, res) {
 const addSprints = async function(req, res) {
     log.silly('Start adding sprints to path...');
     try {
-        const updated = await Path.addSprints(req.params.id, req.body);
-        log.debug('Path was updated');
-        defaultResponse(req, res, 200, updated);
+        if (checkRole(req.user, 'admin')) {
+            const updated = await Path.addSprints(req.params.id, req.body);
+            log.debug('Path was updated');
+            defaultResponse(req, res, 200, updated);
+        } else {
+            defaultResponse(req, res, 403);
+        }
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -149,9 +162,13 @@ const addSprints = async function(req, res) {
 const removeSprints = async function(req, res) {
     log.silly('Start removing sprints from path...');
     try {
-        const updated = await Path.removeSprints(req.params.id, req.body);
-        log.debug('Path was updated');
-        defaultResponse(req, res, 200, updated);
+        if (checkRole(req.user, 'admin')) {
+            const updated = await Path.removeSprints(req.params.id, req.body);
+            log.debug('Path was updated');
+            defaultResponse(req, res, 200, updated);
+        } else {
+            defaultResponse(req, res, 403);
+        }
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -160,9 +177,13 @@ const removeSprints = async function(req, res) {
 
 const removePath = async function(req, res) {
     try {
-        const deleted = await Path.removeById(req.params.id);
-        log.debug('Path was deleted');
-        defaultResponse(req, res, 200, deleted);
+        if (checkRole(req.user, 'admin')) {
+            const deleted = await Path.removeById(req.params.id);
+            log.debug('Path was deleted');
+            defaultResponse(req, res, 200, deleted);
+        } else {
+            defaultResponse(req, res, 403);
+        }
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
