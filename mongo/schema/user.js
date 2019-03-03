@@ -6,16 +6,14 @@ const mongoose = require('mongoose');
 const nameValidator = [
     validate({
         validator: 'isLength',
-        arguments: [6, 30],
+        arguments: [2, 30],
         message: 'Name should be between {ARGS[0]} and {ARGS[1]} characters',
     }),
-    /*
     validate({
         validator: 'isAlphanumeric',
-        passIfEmpty: true,
+        passIfEmpty: false,
         message: 'Name should contain alpha-numeric characters only',
     }),
-    */
 ];
 
 const emailValidator = validate({
@@ -26,6 +24,7 @@ const emailValidator = validate({
 module.exports = {
     username: {
         type: String,
+        unique: true,
         validate: nameValidator,
     },
     email: {

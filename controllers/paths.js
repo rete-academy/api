@@ -83,7 +83,7 @@ const unenroll = async function(req, res) {
         const updated = await Path.unenroll(req.params.id, req.body);
         const userIds = isArray(req.body.id) ? req.body.id : [req.body.id];
         log.debug('Path was updated');
-        log.debug(updated);
+        // log.debug(updated);
         userIds.forEach((userId) => {
             updated.sprints.forEach((sprint) => {
                 sprint.materials.forEach(async (materialId) => {

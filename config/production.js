@@ -10,7 +10,7 @@ module.exports = {
 
     log: {
         // error, warn, info, verbose, debug, silly
-        maxLevel: 'info',
+        maxLevel: 'warn',
     },
 
     email: {
