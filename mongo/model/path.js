@@ -62,10 +62,13 @@ modelInstance.enroll = async function(id, doc) {
         const data = isArray(doc.id) ? doc.id : [doc.id];
         const found = await modelInstance.findOne({ _id: id });
         const userIds = found.students.map(i => i.toString());
-        const combined = union(userIds, data);
+        const newIds = data.filter(id => !userIds.includes(id));
         return await modelInstance.findOneAndUpdate(
             { _id: id },
-            { students: combined },
+            {
+                '$addToSet': { 'students': { '$each': newIds } },
+                '$inc': { 'meta.version': 1 },
+            },
             { new: true },
         )
             .sort({ name: 1 })
@@ -82,10 +85,13 @@ modelInstance.unenroll = async function(id, doc) {
         const data = isArray(doc.id) ? doc.id : [doc.id];
         const found = await modelInstance.findOne({ _id: id });
         const userIds = found.students.map(i => i.toString());
-        remove(userIds, (j) => !!data.find(k => j === k));
+        const matchedIds = data.filter(id => userIds.includes(id));
         return await modelInstance.findOneAndUpdate(
             { _id: id },
-            { students: userIds },
+            {
+                '$pull': { 'students': { '$in': matchedIds } },
+                '$inc': { 'meta.version': 1 },
+            },
             { new: true },
         )
             .sort({ name: 1 })
@@ -125,6 +131,7 @@ modelInstance.updateById = async function(id, doc) {
         delete data._id;
         delete data.__v;
         data.updatedTime = Date.now();
+        data.meta.version += 1;
         return await modelInstance.findOneAndUpdate(
             { _id: id },
             data,
@@ -142,13 +149,12 @@ modelInstance.addSprints = async function(id, doc) {
         const data = isArray(doc.id) ? doc.id : [doc.id];
         const found = await modelInstance.findOne({ _id: id });
         const sprintIds = found.sprints.map(id => id.toString());
-        const combined = union(sprintIds, data);
-        if (found.meta && found.meta.version) { found.meta.version += 1; }
+        const newIds = data.filter(id => !sprintIds.includes(id));
         return await modelInstance.findOneAndUpdate(
             { _id: id },
-            { 
-                sprints: combined,
-                meta: found.meta,
+            {
+                '$addToSet': { 'sprints': { '$each': newIds } },
+                '$inc': { 'meta.version': 1 },
             },
             { new: true },
         );
@@ -164,14 +170,12 @@ modelInstance.removeSprints = async function(id, doc) {
         const data = isArray(doc.id) ? doc.id : [doc.id];
         const found = await modelInstance.findOne({ _id: id });
         const sprintIds = found.sprints.map(i => i.toString());
-        // Note: remove mutates the origin array
-        remove(sprintIds, (j) => data.find(k => j === k));
-        if (found.meta && found.meta.version) { found.meta.version += 1; }
+        const matchedIds = data.filter(id => sprintIds.includes(id));
         return await modelInstance.findOneAndUpdate(
             { _id: id },
-            { 
-                sprints: sprintIds,
-                meta: found.meta,
+            {
+                '$pull': { 'sprints': { '$in': matchedIds } },
+                '$inc': { 'meta.version': 1 },
             },
             { new: true },
         );

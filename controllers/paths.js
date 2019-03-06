@@ -51,7 +51,6 @@ const enroll = async function(req, res) {
         userIds.forEach((userId) => {
             updated.sprints.forEach((sprint) => {
                 sprint.materials.forEach(async (materialId) => {
-                    // const updatedUser = await User.findOneAndUpdate({
                     await User.findOneAndUpdate({
                         _id: userId,
                         'progress.material': { '$ne': materialId },
@@ -81,9 +80,16 @@ const unenroll = async function(req, res) {
     log.silly('Start unenrolling from a path...');
     try {
         const updated = await Path.unenroll(req.params.id, req.body);
-        const userIds = isArray(req.body.id) ? req.body.id : [req.body.id];
+        // const userIds = isArray(req.body.id) ? req.body.id : [req.body.id];
         log.debug('Path was updated');
+        await User.findOneAndUpdate({
+            _id: req.body.id,
+            'progress.path': req.params.id,
+        }, {
+            '$pull': { 'progress': { path: req.params.id } }
+        });
         // log.debug(updated);
+        /*
         userIds.forEach((userId) => {
             updated.sprints.forEach((sprint) => {
                 sprint.materials.forEach(async (materialId) => {
@@ -102,6 +108,7 @@ const unenroll = async function(req, res) {
                 });
             });
         });
+        */
         defaultResponse(req, res, 200, updated);
     } catch(error) { 
         log.error(`[Unenroll controller] ${error.name}: ${error.message}`);

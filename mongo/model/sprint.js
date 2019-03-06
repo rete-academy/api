@@ -1,7 +1,6 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const { union, remove } = require('lodash');
 const { isArray } = require('library/utils');
 const log = require('library/logger');
 const modelName = require('path').basename(__filename).slice(0, -3);
@@ -53,6 +52,12 @@ modelInstance.createNew = async function(obj) {
     }
 };
 
+/*
+ * Update sprint by ID.
+ * Please note that this method only using for editing
+ * sprint details. For add/remove materials, use
+ * addMaterials/removeMaterials instead.
+ */
 modelInstance.updateById = async function(id, doc) {
     try {
         log.silly('Updating a ' + modelName + ' with id ' + id);
@@ -60,6 +65,7 @@ modelInstance.updateById = async function(id, doc) {
         delete data._id;
         delete data.__v;
         data.updatedTime = Date.now();
+        data.meta.version += 1;
         return await modelInstance.findOneAndUpdate(
             { _id: id },
             data,
@@ -77,13 +83,12 @@ modelInstance.addMaterials = async function(id, doc) {
         const data = isArray(doc.id) ? doc.id : [doc.id];
         const found = await modelInstance.findOne({ _id: id });
         const materialIds = found.materials.map(id => id.toString());
-        const combined = union(materialIds, data);
-        if (found.meta && found.meta.version) { found.meta.version += 1; }
+        const newIds = data.filter(id => !materialIds.includes(id));
         return await modelInstance.findOneAndUpdate(
             { _id: id },
-            { 
-                materials: combined,
-                meta: found.meta,
+            {
+                '$addToSet': { 'materials': { '$each': newIds } },
+                '$inc': { 'meta.version': 1 },
             },
             { new: true },
         );
@@ -99,14 +104,12 @@ modelInstance.removeMaterials = async function(id, doc) {
         const data = isArray(doc.id) ? doc.id : [doc.id];
         const found = await modelInstance.findOne({ _id: id });
         const materialIds = found.materials.map(i => i.toString());
-        // Note: remove mutates the origin array
-        remove(materialIds, (j) => !!data.find(k => j === k));
-        if (found.meta && found.meta.version) { found.meta.version += 1; }
+        const matchedIds = data.filter(id => materialIds.includes(id));
         return await modelInstance.findOneAndUpdate(
             { _id: id },
-            { 
-                materials: materialIds,
-                meta: found.meta,
+            {
+                '$pull': { 'materials': { '$in': matchedIds } },
+                '$inc': { 'meta.version': 1 },
             },
             { new: true },
         );
