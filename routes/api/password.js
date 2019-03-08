@@ -7,7 +7,7 @@ module.exports = function (passport) {
     let auth = passport.authenticate(['basic', 'bearer'], {session: false});
     let auth_reset = passport.authenticate(['password-reset'], {session: false});
 
-    router.get('', auth, ctrl.findAll);
+    router.get('', auth, ctrl.invalidRequest);
     router.post('', auth, ctrl.invalidRequest);
     router.put('', auth, ctrl.invalidRequest);
     router.delete('', auth, ctrl.invalidRequest);
