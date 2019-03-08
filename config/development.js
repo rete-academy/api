@@ -25,7 +25,7 @@ module.exports = {
         },
         reset: {
             subject: 'Reset your password',
-            text: 'Click the link below to reset your password',
+            text: 'Reset your password',
             content: 'Reset your password',
         },
     },

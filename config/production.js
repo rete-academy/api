@@ -16,12 +16,17 @@ module.exports = {
     email: {
         admin: 'admin@rete.academy',
         bcc: 'sangdth@gmail.com',
-        confirmation: 'confirm@rete.academy',
+        confirmation: 'noreply@rete.academy',
         noreply: 'noreply@rete.academy',
         welcome: {
             subject: 'Welcome to Rete Academy',
             text: 'Welcome to Rete Academy',
-            content: 'Here is the content of the welcome email. Edit in config.',
+            content: 'Welcome to Rete Academy.',
+        },
+        reset: {
+            subject: 'Reset your password',
+            text: 'Reset your password',
+            content: 'Reset your password',
         },
     },
 
