@@ -108,7 +108,7 @@ const updateUser = async function(req, res) {
 const updateMaterialStatus = async function(req, res) {
     log.silly('Start updating material status...');
     try {
-        await User.updateMaterialStatus(req.params.userId, req.params.materialId, req.body);
+        await User.updateMaterialStatus(req.params.userId, req.body);
         log.debug('User was updated');
         defaultResponse(req, res, 200, 'OK');
     } catch(error) { 

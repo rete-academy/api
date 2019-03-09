@@ -54,6 +54,7 @@ const enroll = async function(req, res) {
                     path: updated._id,
                     sprint: s._id,
                     material: m._id,
+                    status: 0,
                 }))
             ))
             .reduce((i, v) => i.concat(v), []); // flat it

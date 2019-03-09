@@ -131,20 +131,17 @@ modelInstance.updateById = function(id, doc) {
         });
 };
 
-modelInstance.updateMaterialStatus = async function(userId, materialId, data) {
+modelInstance.updateMaterialStatus = async function(userId, data) {
     try {
-        log.silly('Start update a ' + modelName + ' with id ' + materialId);
-
-        return await modelInstance.update({
-            _id: userId,
-            'progress.material': materialId,
-        }, {
-            '$set': {
-                'progress.$.status': data.status,
-            }
-        }, {
-            new: true,
-        });
+        const updated = await modelInstance.findOneAndUpdate(
+            {
+                _id: userId,
+                'progress._id': data.id,
+            },
+            { '$set': { 'progress.$.status': data.status } },
+            { new: true }
+        );
+        return updated;
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         throw error;

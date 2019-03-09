@@ -37,7 +37,7 @@ module.exports = function(passport) {
     router.post('/:id', auth, invalidRequest);
     router.post('/:id/upload', auth, uploadToS3.single('avatar'), upload);
     router.put('/:id', auth, updateUser);
-    router.put('/:userId/materials/:materialId', auth, updateMaterialStatus);
+    router.put('/:userId/materials', auth, updateMaterialStatus);
     router.delete('/:id', auth, remove);
 
     return router;
