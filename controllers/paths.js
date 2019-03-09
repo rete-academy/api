@@ -48,27 +48,49 @@ const enroll = async function(req, res) {
     try {
         const updated = await Path.enroll(req.params.id, req.body);
         const userIds = isArray(req.body.id) ? req.body.id : [req.body.id];
+        const progressArray = updated
+            .sprints.map((s) => (
+                s.materials.map((m) => ({
+                    path: updated._id,
+                    sprint: s._id,
+                    material: m._id,
+                }))
+            ))
+            .reduce((i, v) => i.concat(v), []); // flat it
+        
+        await Promise.all(userIds.map(async (userId) => {
+            await User.findOneAndUpdate(
+                { _id: userId },
+                {
+                    '$addToSet': { 'progress': { '$each': progressArray } },
+                    '$inc': { 'meta.version': 1 },
+                },
+                { new: true });
+        }));
+
+        /*
         userIds.forEach((userId) => {
             updated.sprints.forEach((sprint) => {
                 sprint.materials.forEach(async (materialId) => {
                     await User.findOneAndUpdate({
                         _id: userId,
-                        'progress.material': { '$ne': materialId },
+                        'progress.path': req.params.id,
                     }, {
-                        '$push': {
+                        '$addToSet': {
                             'progress': {
                                 path: updated._id.toString(),
                                 sprint: sprint._id.toString(),
                                 material: materialId.toString(),
                                 status: 0,
                             }
-                        }
-                    }, {
-                        new: true,
-                    });
+                        },
+                        '$inc': { 'meta.version': 1 },
+                    },
+                    { new: true });
                 });
             });
         });
+        */
         defaultResponse(req, res, 200, updated);
     } catch(error) { 
         log.error(`[Enroll controller] ${error.name}: ${error.message}`);
@@ -80,35 +102,13 @@ const unenroll = async function(req, res) {
     log.silly('Start unenrolling from a path...');
     try {
         const updated = await Path.unenroll(req.params.id, req.body);
-        // const userIds = isArray(req.body.id) ? req.body.id : [req.body.id];
-        log.debug('Path was updated');
         await User.findOneAndUpdate({
             _id: req.body.id,
             'progress.path': req.params.id,
         }, {
             '$pull': { 'progress': { path: req.params.id } }
         });
-        // log.debug(updated);
-        /*
-        userIds.forEach((userId) => {
-            updated.sprints.forEach((sprint) => {
-                sprint.materials.forEach(async (materialId) => {
-                    await User.findOneAndUpdate({
-                        _id: userId,
-                        'progress.material': materialId,
-                    }, {
-                        '$pull': {
-                            'progress': {
-                                path: updated._id.toString(),
-                                sprint: sprint._id.toString(),
-                                material: materialId.toString(),
-                            }
-                        }
-                    });
-                });
-            });
-        });
-        */
+        log.debug('Path was updated');
         defaultResponse(req, res, 200, updated);
     } catch(error) { 
         log.error(`[Unenroll controller] ${error.name}: ${error.message}`);
