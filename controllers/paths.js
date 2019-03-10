@@ -46,12 +46,12 @@ const findSlug = async function(req, res) {
 const enroll = async function(req, res) {
     log.silly('Start enrolling to a path...');
     try {
-        const updated = await Path.enroll(req.params.id, req.body);
+        const updatedPath = await Path.enroll(req.params.id, req.body);
         const userIds = isArray(req.body.id) ? req.body.id : [req.body.id];
-        const progressArray = updated
+        const progressArray = updatedPath
             .sprints.map((s) => (
                 s.materials.map((m) => ({
-                    path: updated._id,
+                    path: updatedPath._id,
                     sprint: s._id,
                     material: m._id,
                     status: 0,
@@ -68,31 +68,7 @@ const enroll = async function(req, res) {
                 },
                 { new: true });
         }));
-
-        /*
-        userIds.forEach((userId) => {
-            updated.sprints.forEach((sprint) => {
-                sprint.materials.forEach(async (materialId) => {
-                    await User.findOneAndUpdate({
-                        _id: userId,
-                        'progress.path': req.params.id,
-                    }, {
-                        '$addToSet': {
-                            'progress': {
-                                path: updated._id.toString(),
-                                sprint: sprint._id.toString(),
-                                material: materialId.toString(),
-                                status: 0,
-                            }
-                        },
-                        '$inc': { 'meta.version': 1 },
-                    },
-                    { new: true });
-                });
-            });
-        });
-        */
-        defaultResponse(req, res, 200, updated);
+        defaultResponse(req, res, 200, updatedPath);
     } catch(error) { 
         log.error(`[Enroll controller] ${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -139,6 +115,7 @@ const updatePath = async function(req, res) {
     try {
         delete req.body.sprints;
         if (checkRole(req.user, 'admin')) {
+            console.log('fucking body', req.body);
             const updated = await Path.updateById(req.params.id, req.body);
             log.debug('Path was updated');
             defaultResponse(req, res, 200, updated);

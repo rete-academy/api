@@ -1,7 +1,6 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const { union, remove } = require('lodash');
 const { isArray } = require('library/utils');
 const log = require('library/logger');
 const modelName = require('path').basename(__filename).slice(0, -3);

@@ -36,6 +36,7 @@ module.exports = {
         type: mongoose.Schema.Types.Mixed,
         default: {
             version: 1,
+            position: {},
         },
     },
     createdTime: {
