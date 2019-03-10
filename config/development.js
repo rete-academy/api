@@ -14,10 +14,16 @@ module.exports = {
     },
 
     email: {
-        admin: 'admin@example.com',
         bcc: 'bcc@example.com',
         confirmation: 'confirm@example.com',
-        noreply: 'noreply@example.com',
+        admin: {
+            name: 'Rete Academy',
+            address: 'admin@example.com',
+        },
+        noreply: {
+            name: 'Rete Academy',
+            address: 'noreply@example.com',
+        },
         welcome: {
             subject: 'Welcome to Rete Academy',
             text: 'Welcome to Rete Academy',

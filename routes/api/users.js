@@ -11,6 +11,7 @@ const {
     updateMaterialStatus,
     createNew,
     remove,
+    sendConfirm,
 } = require('controllers/users');
 const { uploadToS3 } = require('library/upload');
 // const { googleAuth } = require('library/google');
@@ -28,6 +29,7 @@ module.exports = function(passport) {
 
     router.get('', auth, findAll);
     router.get('/profile', auth, findMe);
+    router.post('/profile/send-confirm', authClient, sendConfirm);
     router.post('', authClient, createNew);
     router.put('/confirm/:code', authClient, confirmEmail);
     router.put('', auth, invalidRequest);

@@ -10,6 +10,7 @@ const confirmationCode = require('mongo/model/confirmation_code');
 // const PasswordResetToken = require('mongo/model/password');
 
 const {
+    checkRole,
     authoriseUser,
     defaultResponse,
     filterUserData,
@@ -93,32 +94,40 @@ const createNew = async function(req, res) {
     }
 };
 
-const updateUser = async function(req, res) {
-    log.silly('Start updating a user...');
+const sendConfirm = async function(req, res) {
     try {
-        const updated = await User.updateById(req.params.id, req.body);
-        log.debug('User was updated');
-        defaultResponse(req, res, 200, updated);
-    } catch(error) { 
+        const email = checkRole(req.user, 'admin') ? req.body.email : req.user.email;
+        if (!email) throw new TypeError('Email is required.');
+        const foundUser = await User.findByEmail(email);
+        if (!foundUser) throw new TypeError('Can not find user account');
+        
+        await confirmationCode.removeByEmail(foundUser.email);
+
+        const newConfirm = await confirmationCode.createNew({
+            userId: foundUser._id,
+            email: foundUser.email,
+        });
+
+        await emailService.sendMail({
+            from: config.email.noreply,
+            to: foundUser.email,
+            subject: config.email.welcome.subject,
+            text: config.email.welcome.text,
+            placeholders: {
+                TITLE: config.email.welcome.subject,
+                CONTENT: config.email.welcome.content,
+                LINK: config.default.webUrl + '/confirm/' + newConfirm.code,
+                CODE: newConfirm.code,
+            },
+            type: 'welcome',
+        });
+
+        log.debug('New code created, email sent to ' + foundUser.email);
+        defaultResponse(req, res, 201, 'Check email inbox');
+    } catch (error) {
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
     }
-};
-
-const updateMaterialStatus = async function(req, res) {
-    log.silly('Start updating material status...');
-    try {
-        await User.updateMaterialStatus(req.params.userId, req.body);
-        log.debug('User was updated');
-        defaultResponse(req, res, 200, 'OK');
-    } catch(error) { 
-        log.error(`${error.name}: ${error.message}`);
-        defaultResponse(req, res, error.httpStatusCode, error.message);
-    }
-};
-
-const updateProgress = async function() {
-    log.silly('Start updating study progress...');
 };
 
 const confirmEmail = async function(req, res) {
@@ -148,6 +157,30 @@ const confirmEmail = async function(req, res) {
     }
 };
 
+const updateUser = async function(req, res) {
+    log.silly('Start updating a user...');
+    try {
+        const updated = await User.updateById(req.params.id, req.body);
+        log.debug('User was updated');
+        defaultResponse(req, res, 200, updated);
+    } catch(error) { 
+        log.error(`${error.name}: ${error.message}`);
+        defaultResponse(req, res, error.httpStatusCode, error.message);
+    }
+};
+
+const updateMaterialStatus = async function(req, res) {
+    log.silly('Start updating material status...');
+    try {
+        await User.updateMaterialStatus(req.params.userId, req.body);
+        log.debug('User was updated');
+        defaultResponse(req, res, 200, 'OK');
+    } catch(error) { 
+        log.error(`${error.name}: ${error.message}`);
+        defaultResponse(req, res, error.httpStatusCode, error.message);
+    }
+};
+
 const remove = async function(req, res) {
     try {
         if (req.user.role.includes(0)) {
@@ -167,11 +200,11 @@ module.exports = {
     findAll,
     findMe,
     upload,
-    updateUser,
-    updateMaterialStatus,
-    updateProgress,
-    confirmEmail,
     createNew,
+    updateUser,
+    sendConfirm,
+    confirmEmail,
+    updateMaterialStatus,
     remove,
 };
 

@@ -20,15 +20,7 @@ module.exports.invalidRequest = function (req, res) {
 module.exports.forgot = async (req, res) => {
     try {
         const data = req.body;
-        // let protocol = 'https';
-        // if (req.get('host').indexOf('localhost') !== -1) protocol = 'http';
-
-        // const domain = protocol + '://' + req.get('host');
-        // let redirect;
-        // if (req.headers.referer) redirect = 'https://' + getDomainFromUrl(req.headers.referer);
-        // if (req.query.hasOwnProperty('redirect_uri')) redirect = req.query.redirect_uri;
-
-        if (!req.body.email) return defaultResponse(req, res, 400, 'email is required.');
+        if (!req.body.email) return defaultResponse(req, res, 400, 'Email is required.');
         const foundUser = await User.findOne({ email: req.body.email });
         if (!foundUser) return promiseRejectWithError(404, 'User not found.');
         data.user_id = foundUser._id;

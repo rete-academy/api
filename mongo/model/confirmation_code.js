@@ -82,10 +82,20 @@ modelInstance.removeByCode = async function(code) {
     }
 };
 
-modelInstance.removeByUserId = async function (id) {
+modelInstance.removeByUserId = async function(id) {
     try {
         log.silly('Deleting ' + modelName);
-        return await modelInstance.findOneAndRemove({userId: id});
+        return await modelInstance.findOneAndRemove({ userId: id });
+    } catch(error) { 
+        log.error(`${error.name}: ${error.message}`);
+        throw error;
+    }
+};
+
+modelInstance.removeByEmail = async function(email) {
+    try {
+        log.silly('Deleting ' + modelName);
+        return await modelInstance.deleteMany({ email });
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         throw error;
