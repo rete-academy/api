@@ -2,6 +2,7 @@
 
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+const { isArray } = require('library/utils');
 // const randomize = require('randomatic');
 const log = require('library/logger');
 const modelName = require('path').basename(__filename).slice(0, -3);
@@ -131,15 +132,15 @@ modelInstance.updateById = function(id, doc) {
         });
 };
 
-modelInstance.updateMaterialStatus = async function(userId, data) {
+modelInstance.updateStatus = async function(userId, doc) {
     try {
         const updated = await modelInstance.findOneAndUpdate(
             {
                 _id: userId,
-                'progress._id': data.id,
+                'progress._id': doc.id,
             },
-            { '$set': { 'progress.$.status': data.status } },
-            { new: true }
+            { '$set': { 'progress.$.status': doc.status } },
+            { new: true },
         );
         return updated;
     } catch(error) { 
@@ -148,18 +149,18 @@ modelInstance.updateMaterialStatus = async function(userId, data) {
     }
 };
 
-modelInstance.updateProgress = async function(id, data) {
+modelInstance.updateProgress = async function(userId, doc) {
     try {
         log.silly('Start update a user progress...');
-
+        const data = isArray(doc) ? doc : [doc];
         return await modelInstance.findOneAndUpdate(
-            { _id: id },
-            { progress: data },
+            { _id: userId },
+            {
+                '$addToSet': { 'progress': { '$each': data } },
+                '$inc': { 'meta.version': 1 },
+            },
             { new: true },
-        )
-            .sort({ name: 1 })
-            .populate('paths')
-            .populate('sprints');
+        );
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         throw error;

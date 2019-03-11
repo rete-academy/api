@@ -169,12 +169,24 @@ const updateUser = async function(req, res) {
     }
 };
 
-const updateMaterialStatus = async function(req, res) {
+const updateStatus = async function(req, res) {
     log.silly('Start updating material status...');
     try {
-        await User.updateMaterialStatus(req.params.userId, req.body);
+        await User.updateStatus(req.params.userId, req.body);
         log.debug('User was updated');
         defaultResponse(req, res, 200, 'OK');
+    } catch(error) { 
+        log.error(`${error.name}: ${error.message}`);
+        defaultResponse(req, res, error.httpStatusCode, error.message);
+    }
+};
+
+const updateProgress = async function(req, res) {
+    log.silly('Start updating user progress...');
+    try {
+        const updated = await User.updateProgress(req.params.userId, req.body);
+        log.debug('User was updated');
+        defaultResponse(req, res, 200, updated);
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -204,7 +216,8 @@ module.exports = {
     updateUser,
     sendConfirm,
     confirmEmail,
-    updateMaterialStatus,
+    updateStatus,
+    updateProgress,
     remove,
 };
 

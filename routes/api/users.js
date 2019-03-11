@@ -8,7 +8,8 @@ const {
     findMe,
     upload,
     updateUser,
-    updateMaterialStatus,
+    updateStatus,
+    updateProgress,
     createNew,
     remove,
     sendConfirm,
@@ -39,7 +40,8 @@ module.exports = function(passport) {
     router.post('/:id', auth, invalidRequest);
     router.post('/:id/upload', auth, uploadToS3.single('avatar'), upload);
     router.put('/:id', auth, updateUser);
-    router.put('/:userId/materials', auth, updateMaterialStatus);
+    router.put('/:userId/update-status', auth, updateStatus);
+    router.put('/:userId/update-progress', auth, updateProgress);
     router.delete('/:id', auth, remove);
 
     return router;
