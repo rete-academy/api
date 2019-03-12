@@ -34,7 +34,7 @@ async function createFirstUser() {
 async function createFirstClient() {
     try {
         const foundClients = await Client.find();
-        if (foundClients) {
+        if (foundClients.length > 0) {
             log.debug('Found some client(s), stop.');
             return;
         }
