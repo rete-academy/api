@@ -115,7 +115,6 @@ const updatePath = async function(req, res) {
     try {
         delete req.body.sprints;
         if (checkRole(req.user, 'admin')) {
-            console.log('fucking body', req.body);
             const updated = await Path.updateById(req.params.id, req.body);
             log.debug('Path was updated');
             defaultResponse(req, res, 200, updated);

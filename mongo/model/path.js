@@ -128,9 +128,7 @@ modelInstance.updateById = async function(id, doc) {
         log.silly('Updating a ' + modelName + ' with id ' + id);
         let data = { ...doc };
         delete data._id;
-        delete data.__v;
         data.updatedTime = Date.now();
-        data.meta.version += 1;
         return await modelInstance.findOneAndUpdate(
             { _id: id },
             data,

@@ -20,6 +20,10 @@ module.exports = {
         default: 'tutorial',
         // ebook, article, video, tutorial
     },
+    conversation: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'conversation',
+    },
     icon: {
         type: String,
         default: 'file',
