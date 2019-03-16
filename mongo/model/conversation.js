@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const { isArray } = require('library/utils');
+// const { isArray } = require('library/utils');
 const log = require('library/logger');
 const modelName = require('path').basename(__filename).slice(0, -3);
 
@@ -25,8 +25,8 @@ modelInstance.findAll = async function(query) {
         log.silly('Finding ' + modelName);
         return await modelInstance.find(query)
             .sort({ createdTime: 1 })
-            .populate('messages.sender')
-            .populate('messages.material');
+            .populate('material')
+            .populate('messages.user');
     } catch(error) {
         log.error(`${error.name}: ${error.message}`);
         throw error;

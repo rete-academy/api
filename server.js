@@ -10,13 +10,14 @@ const session = require('express-session');
 const helmet = require('helmet')();
 const bodyParser = require('body-parser');
 const passport = require('passport');
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 const config = require('config');
+const log = require('library/logger');
 
 Sentry.init({ dsn: 'https://7a23e0719d964b6ea1252e9912d5e0f0@sentry.io/1401406' });
 app.use(Sentry.Handlers.requestHandler());
 app.use(Sentry.Handlers.errorHandler());
-
-const log = require('library/logger');
 
 require('library/passport')(passport);
 require('mongo/db');
@@ -35,11 +36,13 @@ if (app.get('env') === 'production') {
     sessOptions.cookie.secure = true // serve secure cookies
 }
 app.use(session(sessOptions));
-
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-
 app.use(passport.initialize());
+app.use((req, res, next) => {
+    req.io = io; // add io into req so controllers can use it
+    next();
+});
 
 require('routes/index')(app, passport);
 
@@ -62,18 +65,14 @@ app.use(function (err, req, res) {
     });
 });
 
-let server = require('http').createServer(app);
-let port = process.env.PORT || 8000;
+const port = process.env.PORT || 8000;
 
 // start HTTP server
 server.listen(port, () => {
     log.info(`App runs on: ${config.default.baseUrl}`);
 }).on('error', (err) => {
-    if (err.errno === 'EADDRINUSE') {
-        log.error(err);
-    } else {
-        log.error('Something wrong');
-    }
+    if (err.errno === 'EADDRINUSE') log.error(err);
+    else log.error('Something wrong');
 });
 
 // process.on('unhandledRejection', (reason, p) => {

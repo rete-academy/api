@@ -13,7 +13,6 @@ const {
 router.use(function(req, res, next) {
     req.body.client_id = process.env.CLIENT_ID;
     req.body.client_secret = process.env.CLIENT_SECRET;
-
     next()
 });
 

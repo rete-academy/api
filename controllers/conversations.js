@@ -34,7 +34,7 @@ const findAll = async function(req, res) {
 const findById = async function(req, res) {
     try {
         log.verbose('Start finding a conversation');
-        const result = await Conversation.findOne({ _id: req.params.id });
+        const result = await Conversation.findById(req.params.id);
         defaultResponse(req, res, 200, result);
     } catch (error) { 
         log.error(`${error.name}: ${error.message}`);
@@ -59,9 +59,10 @@ const createNew = async function(req, res) {
 };
 
 const addMessage = async function(req, res) {
-    log.silly('Start adding message into conversation...');
     try {
+        log.verbose('Start adding message into conversation...');
         const updated = await Conversation.addMessage(req.params.id, req.body);
+        req.io.emit('CHAT_MESSAGE', updated);
         defaultResponse(req, res, 201, updated);
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
@@ -73,7 +74,7 @@ const remove = async function(req, res) {
     try {
         if (checkRole(req.user, 'admin')) {
             await Conversation.removeById(req.params.id);
-            log.debug('Conversation was deleted');
+            log.verbose('Conversation was deleted');
             defaultResponse(req, res, 200, 'Deleted');
         } else {
             defaultResponse(req, res, 403);
