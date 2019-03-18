@@ -5,17 +5,12 @@ const log = require('library/logger');
 const User = require('mongo/model/user');
 const config = require('config');
 const emailService = require('library/email');
-// const Image = require('mongo/model/image');
 const confirmationCode = require('mongo/model/confirmation_code');
-// const PasswordResetToken = require('mongo/model/password');
 
 const {
     checkRole,
-    authoriseUser,
     defaultResponse,
     filterUserData,
-    // getDomainWithUrl,
-    // sendMail,
 } = require('library/utils');
 
 const invalidRequest = function(req, res) {
@@ -39,17 +34,6 @@ const findMe = async function(req, res) {
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);
-    }
-};
-
-const upload = async function(req, res) {
-    try {
-        const authed = await authoriseUser(req, res);
-        if (authed && req.file) {
-            defaultResponse(req, res, 200, req.file);
-        }
-    } catch (error) {
-        throw error;
     }
 };
 
@@ -100,14 +84,14 @@ const sendConfirm = async function(req, res) {
         if (!email) throw new TypeError('Email is required.');
         const foundUser = await User.findByEmail(email);
         if (!foundUser) throw new TypeError('Can not find user account');
-        
+        // Delete the confirmation code linked with user email (if anh)
         await confirmationCode.removeByEmail(foundUser.email);
-
+        //  Create new confirmation code.
         const newConfirm = await confirmationCode.createNew({
             userId: foundUser._id,
             email: foundUser.email,
         });
-
+        // Send email to notify user. Need fall back solution if sending fail
         await emailService.sendMail({
             from: config.email.noreply,
             to: foundUser.email,
@@ -193,10 +177,34 @@ const updateProgress = async function(req, res) {
     }
 };
 
+const uploadAvatar = async function(req, res) {
+    try {
+        if (req.file && req.user) {
+            // the uploadToS3 will attach the result into req.file
+            const updated = await User.findOneAndUpdate(
+                { _id: req.user._id },
+                {
+                    $set: {
+                        avatar: { ...req.file },
+                        updatedTime: Date.now(),
+                    },
+                },
+                { new: true }
+            );
+            defaultResponse(req, res, 200, updated);
+        }
+    } catch (error) {
+        log.error(`${error.name}: ${error.message}`);
+        defaultResponse(req, res, error.httpStatusCode, error.message);
+    }
+};
+
 const remove = async function(req, res) {
+    log.silly('Start deleting user...');
     try {
         if (req.user.role.includes(0)) {
             const deleted = User.removeById(req.params.id);
+            log.debug('User was deleted');
             defaultResponse(req, res, 200, deleted);
         } else {
             defaultResponse(req, res, 403);
@@ -211,7 +219,7 @@ module.exports = {
     invalidRequest,
     findAll,
     findMe,
-    upload,
+    uploadAvatar,
     createNew,
     updateUser,
     sendConfirm,

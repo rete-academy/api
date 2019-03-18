@@ -6,7 +6,7 @@ const {
     confirmEmail,
     findAll,
     findMe,
-    upload,
+    uploadAvatar,
     updateUser,
     updateStatus,
     updateProgress,
@@ -36,9 +36,8 @@ module.exports = function(passport) {
     router.put('', auth, invalidRequest);
     router.delete('', auth, invalidRequest);
 
-    // router.get('/:id', auth, ctrl.find);
     router.post('/:id', auth, invalidRequest);
-    router.post('/:id/upload', auth, uploadToS3.single('avatar'), upload);
+    router.post('/:id/avatar', auth, uploadToS3.single('avatar'), uploadAvatar);
     router.put('/:id', auth, updateUser);
     router.put('/:userId/update-status', auth, updateStatus);
     router.put('/:userId/update-progress', auth, updateProgress);

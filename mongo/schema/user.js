@@ -38,7 +38,6 @@ module.exports = {
     },
     avatar: {
         type: mongoose.Schema.Types.Mixed,
-        url: String,
     },
     provider: {
         type: mongoose.Schema.Types.Mixed,
