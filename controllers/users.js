@@ -144,6 +144,9 @@ const confirmEmail = async function(req, res) {
 const updateUser = async function(req, res) {
     log.silly('Start updating a user...');
     try {
+        if (!checkRole(req.user, 'admin') && req.body.role) {
+            delete req.body.role;
+        }
         const updated = await User.updateById(req.params.id, req.body);
         log.debug('User was updated');
         defaultResponse(req, res, 200, updated);
@@ -156,6 +159,7 @@ const updateUser = async function(req, res) {
 const updateStatus = async function(req, res) {
     log.silly('Start updating material status...');
     try {
+        if (req.body.role) { delete req.body.role; }
         await User.updateStatus(req.params.userId, req.body);
         log.debug('User was updated');
         defaultResponse(req, res, 200, 'OK');
@@ -168,6 +172,7 @@ const updateStatus = async function(req, res) {
 const updateProgress = async function(req, res) {
     log.silly('Start updating user progress...');
     try {
+        if (req.body.role) { delete req.body.role; }
         const updated = await User.updateProgress(req.params.userId, req.body);
         log.debug('User was updated');
         defaultResponse(req, res, 200, updated);
