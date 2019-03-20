@@ -11,6 +11,7 @@ const {
     checkRole,
     defaultResponse,
     filterUserData,
+    slugify,
 } = require('library/utils');
 
 const invalidRequest = function(req, res) {
@@ -40,9 +41,9 @@ const findMe = async function(req, res) {
 const createNew = async function(req, res) {
     try {
         let user = req.body;
-        if (!user.username) user.username = user.email.split('@').shift();
-        const usedUser = await User.findOne({ username: user.username });
-        if (usedUser) user.username = user.username.concat(randomize('Aa', 10));
+        // const usedUser = await User.findOne({ username: user.username });
+        // if (!user.username || usedUser) {
+        user.username = randomize('Aa0', 16);
 
         if (!req.body.email) throw new TypeError('Email is required.');
         

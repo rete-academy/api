@@ -7,13 +7,9 @@ const {
 const log = require('library/logger');
 const Conversation = require('mongo/model/conversation');
 const Material = require('mongo/model/material');
-// const Path = require('mongo/model/path');
-// const User = require('mongo/model/user');
 
 const {
-    // slugify,
     defaultResponse,
-    // promiseRejectWithError,
 } = require('library/utils');
 
 const invalidRequest = function(req, res) {
@@ -61,9 +57,14 @@ const createNew = async function(req, res) {
 const addMessage = async function(req, res) {
     try {
         log.verbose('Start adding message into conversation...');
+        if (req.body.content === '') {
+            const old = await Conversation.findById(req.params.id);
+            req.io.emit('CHAT_MESSAGE', old);
+            return defaultResponse(req, res, 200, old);
+        }
         const updated = await Conversation.addMessage(req.params.id, req.body);
         req.io.emit('CHAT_MESSAGE', updated);
-        defaultResponse(req, res, 201, updated);
+        return defaultResponse(req, res, 201, updated);
     } catch(error) { 
         log.error(`${error.name}: ${error.message}`);
         defaultResponse(req, res, error.httpStatusCode, error.message);

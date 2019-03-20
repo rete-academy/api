@@ -24,7 +24,6 @@ const emailValidator = validate({
 module.exports = {
     username: {
         type: String,
-        unique: true,
         validate: nameValidator,
     },
     email: {
