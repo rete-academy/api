@@ -3,18 +3,9 @@
 const mongoose = require('mongoose');
 
 module.exports = {
-    name: {
-        type: String,
-    },
-    type: {
-        type: String,
-    },
-    size: {
-        type: String,
-    },
-    url: {
-        type: String,
-        required: true,
+    data: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
     },
     status: {
         type: String,

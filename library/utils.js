@@ -108,8 +108,19 @@ function filterPathData(auth, results) {
         }
         return data;
     }
-
 }
+
+function filterFiles(auth, results) {
+    const data = JSON.parse(JSON.stringify(results));
+    if (auth && auth.role && auth.role.includes(0)) {
+        // return all if user is admin
+        return data;
+    } else {
+        // otherwise, remove other users files out of results
+        return data.filter(o => o.author._id === auth._id.toString());
+    }
+}
+
 
 function filterUserData(auth, results) {
     if (auth.email) { // only allow registered user
@@ -146,6 +157,7 @@ module.exports = {
     defaultResponse,
     filterPathData,
     filterUserData,
+    filterFiles,
     getDomainFromUrl,
     notifyAdmin,
     slugify,

@@ -31,8 +31,7 @@ const uploadToS3 = multer({
             cb(null, { fieldName: file.fieldname });
         },
         key: function (req, file, cb) {
-            // make folder by adding string like this
-            cb(null, 'avatar/' + file.originalname)
+            cb(null,`${req.user._id}/${file.fieldname}/${file.originalname}`);
         },
     }),
 });

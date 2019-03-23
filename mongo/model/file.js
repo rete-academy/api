@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const { isArray } = require('library/utils');
+// const { isArray } = require('library/utils');
 // const randomize = require('randomatic');
 const log = require('library/logger');
 const modelName = require('path').basename(__filename).slice(0, -3);

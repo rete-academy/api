@@ -3,7 +3,7 @@
 const router = require('express').Router();
 const {
     // invalidRequest,
-    // findAll,
+    findAll,
     uploadSingle,
 } = require('controllers/files');
 const { uploadToS3 } = require('library/upload');
@@ -17,8 +17,9 @@ router.use(function(req, res, next) {
 
 module.exports = function(passport) {
     let auth = passport.authenticate(['bearer'], { session: false });
-
-    router.post('/upload', auth, uploadToS3.single('file'), uploadSingle);
+    
+    router.get('', auth, findAll);
+    router.post('/upload', auth, uploadToS3.single('files'), uploadSingle);
 
     return router;
 };
