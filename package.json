@@ -1,7 +1,7 @@
 {
-  "name": "template-api",
+  "name": "rete-academy-api",
   "version": "1.2.0-alpha",
-  "description": "Template for making API in Node, Express",
+  "description": "Rete Academy API in Node, Express",
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",

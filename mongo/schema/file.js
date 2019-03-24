@@ -5,7 +5,14 @@ const mongoose = require('mongoose');
 module.exports = {
     data: {
         type: mongoose.Schema.Types.Mixed,
-        default: {},
+        default: {
+            fieldname: '',
+            originalname: '',
+            encoding: '',
+            mimetype: '',
+            size: 0,
+            location: '',
+        },
     },
     status: {
         type: String,

@@ -14,7 +14,7 @@ const {
     remove,
     sendConfirm,
 } = require('controllers/users');
-const { uploadToS3 } = require('library/upload');
+const { uploadToS3 } = require('library/aws');
 // const { googleAuth } = require('library/google');
 
 router.use(function(req, res, next) {

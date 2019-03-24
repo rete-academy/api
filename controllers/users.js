@@ -11,7 +11,7 @@ const {
     checkRole,
     defaultResponse,
     filterUserData,
-    slugify,
+    // slugify,
 } = require('library/utils');
 
 const invalidRequest = function(req, res) {

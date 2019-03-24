@@ -36,7 +36,22 @@ const uploadToS3 = multer({
     }),
 });
 
+const deleteFromS3 = (params) => {
+    return new Promise((resolve, reject) => {
+        s3.deleteObjects(params, (err, data) => {
+            if (err) {
+                log.error(err.stack);
+                reject(err.stack);
+            } else {
+                log.debug(data);
+                resolve(data);
+            }
+        });
+    });
+};
+
 module.exports = {
     uploadToS3,
+    deleteFromS3,
     normalUpload,
 };
