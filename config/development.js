@@ -45,5 +45,6 @@ module.exports = {
         apiDelay: 0,
         tokenLife: 2592000,
         codeLife: 2592000,
+        fileCache: 31536000,
     },
 };
