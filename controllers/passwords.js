@@ -7,8 +7,8 @@ const User = require('mongo/model/user');
 const emailService = require('library/email');
 const {
     // authoriseUser,
+    // getDomainFromUrl,
     defaultResponse,
-    getDomainFromUrl,
     promiseRejectWithError,
     strengthCheck,
 } = require('library/utils');
