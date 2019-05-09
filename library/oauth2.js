@@ -68,13 +68,13 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirect_uri, 
 
 exports.authorization = [
     server.authorization(function (client_id, redirect_uri, callback) {
-        Client.findOne({client_id: client_id}, function (err, client) {
+        Client.findOne({ client_id: client_id }, function (err, client) {
             if (err) return callback(err);
             return callback(null, client, redirect_uri);
         });
     }),
     function (req, res) {
-        res.render('dialog', {transaction_id: req.oauth2.transactionID, user: req.user, client: req.oauth2.client});
+        res.render('dialog', { transaction_id: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
     }
 ];
 
