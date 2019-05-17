@@ -4,6 +4,7 @@ const mg = require('nodemailer-mailgun-transport')
 // const config = require('config');
 const log = require('library/logger');
 
+const adminTemplate = 'library/email/admin.html';
 const welcomeTemplate = 'library/email/welcome.html';
 const resetTemplate = 'library/email/reset.html';
 const generalTemplate = 'library/email/general.html';
@@ -27,6 +28,8 @@ class EmailService {
             let html = '';
 
             switch(type) {
+            case 'admin': 
+                html = await fs.readFile(adminTemplate); break;
             case 'general': 
                 html = await fs.readFile(generalTemplate); break;
             case 'welcome': 

@@ -11,8 +11,9 @@ const {
 
 module.exports = function (passport) {
     let auth = passport.authenticate(['bearer'], { session: false });
+    let authClient = passport.authenticate(['bearer', 'client-basic'], { session: false });
 
-    router.get('', auth, findAll);
+    router.get('', authClient, findAll);
     router.post('', auth, createMaterial);
     router.put('', auth, invalidRequest);
     router.delete('', auth, invalidRequest);

@@ -2,10 +2,7 @@
 
 const mongoose = require('mongoose');
 const log = require('library/logger');
-const {
-    createFirstUser,
-    createFirstClient,
-} = require('./create');
+const { createAdmin } = require('./create');
 
 mongoose.set('useCreateIndex', true);
 
@@ -13,11 +10,10 @@ mongoose.set('useCreateIndex', true);
 handleConnect();
 
 // Listen for Mongoose connection events and output statuses to console
-mongoose.connection.on('connected', function() {
+mongoose.connection.on('connected', async function() {
     log.verbose('Connecting to ' + process.env.MONGO_URL);
     log.info('App connected to database successfully');
-    createFirstUser();
-    createFirstClient();
+    createAdmin();
 });
 
 mongoose.connection.on('error', function(err) {

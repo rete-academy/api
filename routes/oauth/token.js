@@ -6,10 +6,10 @@ const ctrl = require('controllers/tokens');
 
 module.exports = function (passport) {
     let auth = passport.authenticate(['bearer'], { session: false });
-    let client_auth = passport.authenticate('client-basic', { session: false });
+    let clientAuth = passport.authenticate('client-basic', { session: false });
 
     router.get('', auth, ctrl.findAll);
-    router.post('', client_auth, oauth2.token);
+    router.post('', clientAuth, oauth2.token);
     router.put('', auth, ctrl.invalidRequest);
     router.delete('', auth, ctrl.invalidRequest);
 

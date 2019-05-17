@@ -26,7 +26,7 @@ app.use(helmet);
 app.use(cors({ origin: config.default.webUrl }));
 
 const sessOptions = {
-    secret: process.env.CLIENT_SECRET,
+    secret: 'sessionSecret123',
     resave: false,
     saveUninitialized: true,
     cookie: {}
