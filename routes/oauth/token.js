@@ -13,6 +13,8 @@ module.exports = function (passport) {
     router.put('', auth, ctrl.invalidRequest);
     router.delete('', auth, ctrl.invalidRequest);
 
+    router.get('/test', auth, ctrl.testToken);
+
     router.get('/:token', auth, ctrl.find);
     router.post('/:token', auth, ctrl.invalidRequest);
     router.put('/:token', auth, ctrl.invalidRequest);

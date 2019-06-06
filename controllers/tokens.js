@@ -12,10 +12,9 @@ module.exports.invalidRequest = function (req, res) {
     defaultResponse(req, res, 405);
 };
 
-module.exports.bearerTest = function (req, res) {
+module.exports.testToken = function (req, res) {
     defaultResponse(req, res, 200, {
-        _id: req.user._id,
-        username: req.user.username,
+        user: req.user,
     });
 };
 

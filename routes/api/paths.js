@@ -15,11 +15,11 @@ const {
 } = require('controllers/paths');
 
 module.exports = function (passport) {
-    let authClient = passport.authenticate(['client-basic', 'bearer'], { session: false });
+    // let authClient = passport.authenticate(['client-basic', 'bearer'], { session: false });
     let auth = passport.authenticate(['bearer'], { session: false });
 
-    router.get('', authClient, findAll);
-    router.get('/:slug', authClient, findSlug);
+    router.get('', findAll);
+    router.get('/:slug', findSlug);
     router.post('', auth, createPath);
     router.put('', auth, invalidRequest);
     router.delete('', auth, invalidRequest);
