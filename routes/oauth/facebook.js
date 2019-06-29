@@ -4,18 +4,18 @@ const router = require('express').Router();
 const ctrl = require('controllers/facebook');
 
 module.exports = function (passport) {
-    let auth = passport.authenticate('facebook', { 
-        authType: 'rerequest',
-        scope: ['email', 'user_friends', 'manage_pages'],
-    });
+  let auth = passport.authenticate('facebook', { 
+    authType: 'rerequest',
+    scope: ['email', 'user_friends', 'manage_pages'],
+  });
 
-    const facebookAuth = passport.authenticate('facebook', {
-        successRedirect : '/home',
-        failureRedirect : '/',
-    });
+  const facebookAuth = passport.authenticate('facebook', {
+    successRedirect : '/home',
+    failureRedirect : '/',
+  });
 
-    router.get('', auth, ctrl.test);
-    router.get('/callback', facebookAuth, ctrl.callback);
+  router.get('', auth, ctrl.test);
+  router.get('/callback', facebookAuth, ctrl.callback);
 
-    return router;
+  return router;
 };

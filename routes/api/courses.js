@@ -5,7 +5,7 @@ const router = require('express').Router();
 
 module.exports = function() {
 
-    // router.get('', auth, ctrl.findAll);
+  // router.get('', auth, ctrl.findAll);
 
-    return router;
+  return router;
 };

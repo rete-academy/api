@@ -5,37 +5,37 @@
 const mongoose = require('mongoose');
 
 module.exports = {
-    name: {
-        type: String,
+  name: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  image: {
+    type: String,
+  },
+  materials: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'material',
     },
-    description: {
-        type: String,
+  ],
+  preferences: {
+    type: mongoose.Schema.Types.Mixed,
+  },
+  meta: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {
+      version: 1,
     },
-    image: {
-        type: String,
-    },
-    materials: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'material',
-        },
-    ],
-    preferences: {
-        type: mongoose.Schema.Types.Mixed,
-    },
-    meta: {
-        type: mongoose.Schema.Types.Mixed,
-        default: {
-            version: 1,
-        },
-    },
-    createdTime: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedTime: {
-        type: Date,
-        default: Date.now,
-    },
+  },
+  createdTime: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedTime: {
+    type: Date,
+    default: Date.now,
+  },
 };
 

@@ -7,5 +7,5 @@ module.exports.findAll = function(query) {
 };
 */
 module.exports.findAll = function() {
-    return Promise.resolve([]);
+  return Promise.resolve([]);
 };

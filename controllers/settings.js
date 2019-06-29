@@ -10,22 +10,22 @@ const confirmationCode = require('mongo/model/confirmation_code');
 */
 
 const {
-    // checkRole,
-    defaultResponse,
-    // filterUserData,
-    // slugify,
+  // checkRole,
+  defaultResponse,
+  // filterUserData,
+  // slugify,
 } = require('library/utils');
 
 const invalidRequest = function(req, res) {
-    defaultResponse(req, res, 405);
+  defaultResponse(req, res, 405);
 };
 
 const getSettings = function(req, res) {};
 const putSettings = function(req, res) {};
 
 module.exports = {
-    invalidRequest,
-    getSettings,
-    putSettings,
+  invalidRequest,
+  getSettings,
+  putSettings,
 };
 
