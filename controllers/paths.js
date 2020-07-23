@@ -1,5 +1,3 @@
-'use strict';
-
 const {
   checkRole,
   isArray,
@@ -16,34 +14,34 @@ const {
   // promiseRejectWithError,
 } = require('library/utils');
 
-const invalidRequest = function(req, res) {
+const invalidRequest = (req, res) => {
   defaultResponse(req, res, 405);
 };
 
-const findAll = async function(req, res) {
+const findAll = async (req, res) => {
   try {
     log.verbose('Start finding all paths');
     const allPaths = await Path.findAll(req.query);
     defaultResponse(req, res, 200, filterPathData(req.user, allPaths));
-  } catch (error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const findSlug = async function(req, res) {
+const findSlug = async (req, res) => {
   try {
-    log.verbose('Start finding path with ' + req.params.slug);
+    log.verbose(`Start finding path with ${req.params.slug}`);
     const found = await Path.findSlug(req.params.slug);
     if (found) defaultResponse(req, res, 200, filterPathData(req.user, found));
     else defaultResponse(req, res, 404, 'Not Found');
-  } catch (error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const enroll = async function(req, res) {
+const enroll = async (req, res) => {
   log.silly('Start enrolling to a path...');
   try {
     const updatedPath = await Path.enroll(req.params.id, req.body);
@@ -58,24 +56,25 @@ const enroll = async function(req, res) {
         }))
       ))
       .reduce((i, v) => i.concat(v), []); // flat it
-        
+
     await Promise.all(userIds.map(async (userId) => {
       await User.findOneAndUpdate(
         { _id: userId },
         {
-          '$addToSet': { 'progress': { '$each': progressArray } },
-          '$inc': { 'meta.version': 1 },
+          $addToSet: { progress: { $each: progressArray } },
+          $inc: { 'meta.version': 1 },
         },
-        { new: true });
+        { new: true },
+      );
     }));
     defaultResponse(req, res, 200, updatedPath);
-  } catch(error) { 
+  } catch (error) {
     log.error(`[Enroll controller] ${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const unenroll = async function(req, res) {
+const unenroll = async (req, res) => {
   log.silly('Start unenrolling from a path...');
   try {
     const updated = await Path.unenroll(req.params.id, req.body);
@@ -83,17 +82,17 @@ const unenroll = async function(req, res) {
       _id: req.body.id,
       'progress.path': req.params.id,
     }, {
-      '$pull': { 'progress': { path: req.params.id } }
+      $pull: { progress: { path: req.params.id } },
     });
     log.debug('Path was updated');
     defaultResponse(req, res, 200, updated);
-  } catch(error) { 
+  } catch (error) {
     log.error(`[Unenroll controller] ${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const createPath = async function(req, res) {
+const createPath = async (req, res) => {
   log.silly('Start creating a path...');
   try {
     if (checkRole(req.user, 'admin')) {
@@ -104,13 +103,13 @@ const createPath = async function(req, res) {
     } else {
       defaultResponse(req, res, 403);
     }
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const updatePath = async function(req, res) {
+const updatePath = async (req, res) => {
   log.silly('Start updating a path...');
   try {
     delete req.body.sprints;
@@ -121,13 +120,13 @@ const updatePath = async function(req, res) {
     } else {
       defaultResponse(req, res, 403);
     }
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const addSprints = async function(req, res) {
+const addSprints = async (req, res) => {
   log.silly('Start adding sprints to path...');
   try {
     if (checkRole(req.user, 'admin')) {
@@ -137,13 +136,13 @@ const addSprints = async function(req, res) {
     } else {
       defaultResponse(req, res, 403);
     }
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const removeSprints = async function(req, res) {
+const removeSprints = async (req, res) => {
   log.silly('Start removing sprints from path...');
   try {
     if (checkRole(req.user, 'admin')) {
@@ -153,13 +152,13 @@ const removeSprints = async function(req, res) {
     } else {
       defaultResponse(req, res, 403);
     }
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const removePath = async function(req, res) {
+const removePath = async (req, res) => {
   try {
     if (checkRole(req.user, 'admin')) {
       const deleted = await Path.removeById(req.params.id);
@@ -168,7 +167,7 @@ const removePath = async function(req, res) {
     } else {
       defaultResponse(req, res, 403);
     }
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }

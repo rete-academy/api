@@ -1,4 +1,3 @@
-'use strict';
 /*
  * Path schema definitions
  */
@@ -48,4 +47,3 @@ module.exports = {
     default: Date.now,
   },
 };
-

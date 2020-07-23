@@ -13,6 +13,7 @@ const passport = require('passport');
 const sentry = require('@sentry/node');
 const session = require('express-session');
 // const server = require('http').createServer(app);
+// ha ha ha it works
 const { ApolloServer, gql } = require('apollo-server-express');
 
 const typeDefs = gql`
@@ -95,6 +96,3 @@ app.listen({ port }, () => {
   if (err.errno === 'EADDRINUSE') log.error(err);
   else log.error('Something wrong');
 });
-
-// process.on('unhandledRejection', (reason, p) => {
-// });
