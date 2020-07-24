@@ -1,5 +1,3 @@
-'use strict';
-
 const log = require('library/logger');
 const File = require('mongo/model/file');
 const { deleteFromS3 } = require('library/aws');
@@ -8,26 +6,26 @@ const { deleteFromS3 } = require('library/aws');
 
 const {
   checkRole,
-  filterFiles,
+  sanitizeFiles,
   defaultResponse,
 } = require('library/utils');
 
-const invalidRequest = function(req, res) {
+const invalidRequest = function (req, res) {
   defaultResponse(req, res, 405);
 };
 
-const findAll = async function(req, res) {
+const findAll = async function (req, res) {
   try {
     log.verbose('Start finding all file');
     const allFiles = await File.findAll(req.query);
-    defaultResponse(req, res, 200, filterFiles(req.user, allFiles));
-  } catch (error) { 
+    defaultResponse(req, res, 200, sanitizeFiles(req.user, allFiles));
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const uploadSingle = async function(req, res) {
+const uploadSingle = async function (req, res) {
   try {
     if (req.file && req.user) {
       // the uploadToS3 will attach the result into req.file
@@ -45,19 +43,19 @@ const uploadSingle = async function(req, res) {
   }
 };
 
-const deleteFiles = async function(req, res) {
+const deleteFiles = async function (req, res) {
   try {
     log.verbose('Start deleting files...');
     let deleteObjects = [];
     let files;
-    files = await File.find({ '_id': { $in: req.body.ids } });
+    files = await File.find({ _id: { $in: req.body.ids } });
     // const userFiles = files.filter(o => o.author.toString() === req.user._id.toString());
 
     if (checkRole(req.user, 'admin')) {
-      deleteObjects = files.map(o => ({ Key: o.data.key }));
+      deleteObjects = files.map((o) => ({ Key: o.data.key }));
     } else {
-      files = files.filter(o => o.author.toString() === req.user._id.toString());
-      deleteObjects = files.map(o => ({ Key: o.data.key }));
+      files = files.filter((o) => o.author.toString() === req.user._id.toString());
+      deleteObjects = files.map((o) => ({ Key: o.data.key }));
     }
 
     const deleteParams = {
@@ -67,7 +65,7 @@ const deleteFiles = async function(req, res) {
 
     if (deleteObjects.length > 0) {
       await deleteFromS3(deleteParams);
-      await File.deleteMany({ '_id': { '$in': files.map(o => o._id) }});
+      await File.deleteMany({ _id: { $in: files.map((o) => o._id) } });
       defaultResponse(req, res, 200, 'Deleted');
     } else {
       defaultResponse(req, res, 200, 'Nothing to delete');
@@ -84,4 +82,3 @@ module.exports = {
   uploadSingle,
   deleteFiles,
 };
-

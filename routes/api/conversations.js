@@ -1,5 +1,3 @@
-'use strict';
-
 const router = require('express').Router();
 const {
   invalidRequest,
@@ -10,8 +8,8 @@ const {
 } = require('controllers/conversations');
 // const { googleAuth } = require('library/google');
 
-module.exports = function(passport) {
-  let auth = passport.authenticate(['bearer'], { session: false });
+module.exports = function (passport) {
+  const auth = passport.authenticate(['bearer'], { session: false });
 
   router.get('', auth, invalidRequest);
   router.post('', auth, createNew);

@@ -1,86 +1,62 @@
-'use strict';
+/* eslint-disable no-param-reassign */
+const mongoose = require('mongoose');
 
-// const log = require('library/logger');
+const schemaDefinition = require('../schema/client');
 
-const options = {
-  toObject: {
-    transform: function (doc, ret) {
-      delete ret._id;
-      delete ret.__v;
-      if (ret.created_time) ret.created_time = ret.created_time.getTime();
-      if (ret.updated_time) ret.updated_time = ret.updated_time.getTime();
-      return ret;
-    }
-  },
-  toJSON: {
-    transform: function (doc, ret) {
-      delete ret._id;
-      delete ret.__v;
-      if (ret.created_time) ret.created_time = ret.created_time.getTime();
-      if (ret.updated_time) ret.updated_time = ret.updated_time.getTime();
-      return ret;
-    }
-  },
-  minimize: false
+const transform = (doc, ret) => {
+  delete ret._id;
+  delete ret.__v;
+  if (ret.created_time) ret.created_time = ret.created_time.getTime();
+  if (ret.updated_time) ret.updated_time = ret.updated_time.getTime();
+  return ret;
 };
 
-let mongoose = require('mongoose'),
-  modelName = 'client',
-  schemaDefinition = require('../schema/' + modelName),
-  schemaInstance = mongoose.Schema(schemaDefinition, options);
+const schemaInstance = mongoose.Schema(schemaDefinition, {
+  toObject: { transform },
+  toJSON: { transform },
+  minimize: false,
+});
 
 schemaInstance.index({ client_id: 1 });
 
-let modelInstance = mongoose.model(modelName, schemaInstance),
-  Client = module.exports = modelInstance;
+const modelInstance = mongoose.model('client', schemaInstance);
 
-module.exports.findAll = function (query) {
-  return Client.find(query).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
-};
+modelInstance.findAll = (query) => modelInstance
+  .find(query)
+  .then((result) => Promise.resolve(result))
+  .catch((error) => Promise.reject(error.message));
 
-module.exports.findById = function (id) {
-  return Client.findOne({ client_id: id }).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
-};
+modelInstance.findById = (id) => modelInstance
+  .findOne({ client_id: id })
+  .then((result) => Promise.resolve(result))
+  .catch((error) => Promise.reject(error.message));
 
-module.exports.createNew = function (doc) {
-  let client = doc;
+modelInstance.createNew = (doc) => {
+  const client = doc;
   client.created_time = Date.now();
-  return Client.create(client).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
+  return modelInstance
+    .create(client)
+    .then((result) => Promise.resolve(result))
+    .catch((error) => Promise.reject(error.message));
 };
 
-module.exports.updateById = function (id, doc) {
-  let client = doc;
+modelInstance.updateById = (id, doc) => {
+  const client = doc;
 
   // Delete non-updatable fields from the request
   delete client.created_time;
   delete client.__v;
   delete client._id;
 
-  return Client.findOneAndUpdate({client_id: id}, client, {new: true}).then(function (result) {
-    if (result === null) return Promise.reject('Not found');
+  return modelInstance.findOneAndUpdate({ client_id: id }, client, { new: true }).then((result) => {
+    if (result === null) return Promise.reject(new Error('Not found'));
     return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
+  }).catch((error) => Promise.reject(error.message));
 };
 
-module.exports.removeById = function (id) {
-  return Client.findOneAndRemove({client_id: id}).then(function (result) {
-    if (result === null) return Promise.reject('Not found');
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
-};
+modelInstance.removeById = (id) => modelInstance.findOneAndRemove({ client_id: id }).then((result) => {
+  if (result === null) return Promise.reject(new Error('Not found'));
+  return Promise.resolve(result);
+}).catch((error) => Promise.reject(error.message));
+
+module.exports = modelInstance;

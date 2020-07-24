@@ -1,72 +1,70 @@
-'use strict';
-
+/* eslint-disable no-param-reassign */
 const mongoose = require('mongoose');
 const { isArray } = require('library/utils');
 const log = require('library/logger');
-const modelName = require('path').basename(__filename).slice(0, -3);
 
-const refine = function (doc, ret) {
+const schemaDefinition = require('../schema/path');
+
+const transform = function (doc, ret) {
   ret.meta.students = doc.students.length;
   delete ret.__v;
   return ret;
 };
 
-const schemaDefinition = require('../schema/' + modelName);
 const schemaInstance = mongoose.Schema(schemaDefinition, {
-  collection: `${modelName}s`,
-  toObject: {transform: refine},
-  toJSON: {transform: refine},
-  minimize: false
+  toObject: { transform },
+  toJSON: { transform },
+  minimize: false,
 });
 
-const modelInstance = mongoose.model(modelName, schemaInstance);
+const modelInstance = mongoose.model('path', schemaInstance);
 
-modelInstance.findAll = async function(query) {
+modelInstance.findAll = async function (query) {
   try {
-    log.silly('Finding ' + modelName);
+    log.silly('Finding paths');
     return await modelInstance.find(query)
       .sort({ name: 1 })
       .populate('sprints')
       .populate({
         path: 'sprints',
-        populate: { path: 'materials' }
+        populate: { path: 'materials' },
       })
       .populate('students');
-  } catch(error) {
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     throw error;
   }
 };
 
-modelInstance.findSlug = async function(slug) {
+modelInstance.findSlug = async function (slug) {
   try {
-    log.silly('Finding ' + modelName);
+    log.silly('Finding one path by slug');
     return await modelInstance.findOne({ slug })
       .sort({ name: 1 })
       .populate('sprints')
       .populate({
         path: 'sprints',
-        populate: { path: 'materials' }
+        populate: { path: 'materials' },
       })
       .populate('students');
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     throw error;
   }
 };
 
-modelInstance.enroll = async function(id, doc) {
+modelInstance.enroll = async function (id, doc) {
   try {
-    log.silly('Updating a ' + modelName + ' with id ' + id);
+    log.silly(`Updating a path with id ${id}`);
     const data = isArray(doc.id) ? doc.id : [doc.id];
     const found = await modelInstance.findOne({ _id: id });
-    const userIds = found.students.map(i => i.toString());
-    const newIds = data.filter(id => !userIds.includes(id));
+    const userIds = found.students.map((i) => i.toString());
+    const newIds = data.filter((i) => !userIds.includes(i));
     return await modelInstance.findOneAndUpdate(
       { _id: id },
       {
-        '$addToSet': { 'students': { '$each': newIds } },
-        '$inc': { 'meta.version': 1 },
+        $addToSet: { students: { $each: newIds } },
+        $inc: { 'meta.version': 1 },
       },
       { new: true },
     )
@@ -78,18 +76,18 @@ modelInstance.enroll = async function(id, doc) {
   }
 };
 
-modelInstance.unenroll = async function(id, doc) {
+modelInstance.unenroll = async function (id, doc) {
   try {
-    log.silly('Updating a ' + modelName + ' with id ' + id);
+    log.silly(`Updating a path with id ${id}`);
     const data = isArray(doc.id) ? doc.id : [doc.id];
     const found = await modelInstance.findOne({ _id: id });
-    const userIds = found.students.map(i => i.toString());
-    const matchedIds = data.filter(id => userIds.includes(id));
+    const userIds = found.students.map((i) => i.toString());
+    const matchedIds = data.filter((i) => userIds.includes(i));
     return await modelInstance.findOneAndUpdate(
       { _id: id },
       {
-        '$pull': { 'students': { '$in': matchedIds } },
-        '$inc': { 'meta.version': 1 },
+        $pull: { students: { $in: matchedIds } },
+        $inc: { 'meta.version': 1 },
       },
       { new: true },
     )
@@ -101,9 +99,9 @@ modelInstance.unenroll = async function(id, doc) {
   }
 };
 
-modelInstance.findById = async function(id) {
+modelInstance.findById = async function (id) {
   try {
-    log.silly('Start finding ' + modelName + ' with id ' + id);
+    log.silly(`Start finding path with id ${id}`);
     return await modelInstance.findOne({ _id: id })
       .sort({ name: 1 })
       .populate('sprints');
@@ -113,9 +111,9 @@ modelInstance.findById = async function(id) {
   }
 };
 
-modelInstance.createNew = async function(obj) {
+modelInstance.createNew = async function (obj) {
   try {
-    log.silly('Creating a new ' + modelName);
+    log.silly('Creating a new path');
     return await modelInstance.create(obj);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -123,10 +121,10 @@ modelInstance.createNew = async function(obj) {
   }
 };
 
-modelInstance.updateById = async function(id, doc) {
+modelInstance.updateById = async function (id, doc) {
   try {
-    log.silly('Updating a ' + modelName + ' with id ' + id);
-    let data = { ...doc };
+    log.silly(`Updating a path with id ${id}`);
+    const data = { ...doc };
     delete data._id;
     data.updatedTime = Date.now();
     return await modelInstance.findOneAndUpdate(
@@ -140,18 +138,18 @@ modelInstance.updateById = async function(id, doc) {
   }
 };
 
-modelInstance.addSprints = async function(id, doc) {
+modelInstance.addSprints = async function (id, doc) {
   try {
-    log.silly('Adding sprints to ' + modelName + ' id ' + id);
+    log.silly(`Adding sprints to path id ${id}`);
     const data = isArray(doc.id) ? doc.id : [doc.id];
     const found = await modelInstance.findOne({ _id: id });
-    const sprintIds = found.sprints.map(id => id.toString());
-    const newIds = data.filter(id => !sprintIds.includes(id));
+    const sprintIds = found.sprints.map((i) => i.toString());
+    const newIds = data.filter((i) => !sprintIds.includes(i));
     return await modelInstance.findOneAndUpdate(
       { _id: id },
       {
-        '$addToSet': { 'sprints': { '$each': newIds } },
-        '$inc': { 'meta.version': 1 },
+        $addToSet: { sprints: { $each: newIds } },
+        $inc: { 'meta.version': 1 },
       },
       { new: true },
     );
@@ -161,18 +159,18 @@ modelInstance.addSprints = async function(id, doc) {
   }
 };
 
-modelInstance.removeSprints = async function(id, doc) {
+modelInstance.removeSprints = async function (id, doc) {
   try {
-    log.silly('Removing sprints from ' + modelName + ' id ' + id);
+    log.silly(`Removing sprints from path with id ${id}`);
     const data = isArray(doc.id) ? doc.id : [doc.id];
     const found = await modelInstance.findOne({ _id: id });
-    const sprintIds = found.sprints.map(i => i.toString());
-    const matchedIds = data.filter(id => sprintIds.includes(id));
+    const sprintIds = found.sprints.map((i) => i.toString());
+    const matchedIds = data.filter((i) => sprintIds.includes(i));
     return await modelInstance.findOneAndUpdate(
       { _id: id },
       {
-        '$pull': { 'sprints': { '$in': matchedIds } },
-        '$inc': { 'meta.version': 1 },
+        $pull: { sprints: { $in: matchedIds } },
+        $inc: { 'meta.version': 1 },
       },
       { new: true },
     );
@@ -182,10 +180,10 @@ modelInstance.removeSprints = async function(id, doc) {
   }
 };
 
-modelInstance.removeById = async function(id) {
+modelInstance.removeById = async function (id) {
   try {
-    log.silly('Start remove a ' + modelName + ' with id ' + id)
-    return await modelInstance.findOneAndDelete({ _id: id })
+    log.silly(`Remove a path with id ${id}`);
+    return await modelInstance.findOneAndDelete({ _id: id });
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     throw error;

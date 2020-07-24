@@ -1,52 +1,45 @@
-'use strict';
+/* eslint-disable no-param-reassign */
+const mongoose = require('mongoose');
 
-let options = {
+const options = {
   toObject: {
-    transform: function (doc, ret) {
+    transform(doc, ret) {
       delete ret._id;
       delete ret.__v;
       return ret;
-    }
+    },
   },
   toJSON: {
-    transform: function (doc, ret) {
+    transform(doc, ret) {
       delete ret._id;
       delete ret.__v;
       return ret;
-    }
+    },
   },
-  minimize: false
+  minimize: false,
 };
 
-let mongoose = require('mongoose'),
-  modelName = 'authorization_code',
-  schemaDefinition = require('../schema/' + modelName),
-  schemaInstance = mongoose.Schema(schemaDefinition, options);
+const schemaDefinition = require('../schema/authorization_code');
 
-let modelInstance = mongoose.model(modelName, schemaInstance),
-  AuthorizationCode = module.exports = modelInstance;
+const schemaInstance = mongoose.Schema(schemaDefinition, options);
 
-module.exports.findAll = function (query) {
-  return AuthorizationCode.find(query).then(function (result) {
+const modelInstance = mongoose.model('authorization_code', schemaInstance);
+
+modelInstance.findAll = (query) => modelInstance
+  .find(query)
+  .then((result) => Promise.resolve(result))
+  .catch((error) => Promise.reject(new Error(error.message)));
+
+modelInstance.findByCode = (code) => modelInstance
+  .findOne({ code })
+  .then((result) => Promise.resolve(result))
+  .catch((error) => Promise.reject(new Error(error.message)));
+
+modelInstance.removeByCode = (code) => modelInstance
+  .findOneAndRemove({ code }).then((result) => {
+    if (result === null) return Promise.reject(new Error('Not found'));
     return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
-};
+  })
+  .catch((error) => Promise.reject(new Error(error.message)));
 
-module.exports.findByCode = function (code) {
-  return AuthorizationCode.findOne({code: code}).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
-};
-
-module.exports.removeByCode = function (code) {
-  return AuthorizationCode.findOneAndRemove({code: code}).then(function (result) {
-    if (result === null) return Promise.reject('Not found');
-    return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
-};
+module.exports = modelInstance;

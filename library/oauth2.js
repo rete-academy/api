@@ -1,5 +1,3 @@
-'use strict';
-
 const oauth2orize = require('oauth2orize');
 const crypto = require('crypto');
 
@@ -11,126 +9,127 @@ const Client = require('mongo/model/client');
 const AuthorizationCode = require('mongo/model/authorization_code');
 const AccessToken = require('mongo/model/token');
 
-let server = oauth2orize.createServer();
-/*
- * add these things will make authentication process slow?
+const server = oauth2orize.createServer();
+
+//  * add these things will make authentication process slow?
 server.serializeClient((client, done) => {
-    done(null, client.client_id)
+  done(null, client.clientId);
 });
 
 server.deserializeClient((id, done) => {
-    Client.findOne({ client_id: id }, (error, client) => {
-        if (error) return done(error);
-        return done(null, client);
-    });
+  Client.findOne({ client_id: id }, (error, client) => {
+    if (error) return done(error);
+    return done(null, client);
+  });
 });
- */
+
 server.grant(oauth2orize.grant.code({
-  scopeSeparator: [' ', ',']
-}, function (client, redirect_uri, user, ares, callback) {
-  let authorization_code = new AuthorizationCode({
+  scopeSeparator: [' ', ','],
+}, (client, redirectUri, user, ares, callback) => {
+  const authorizationCode = new AuthorizationCode({
     code: crypto.randomBytes(16).toString('hex'),
     client_id: client.client_id,
-    redirect_uri: redirect_uri,
+    redirect_uri: redirectUri,
     user_id: user._id,
-    scope: ares.scope
+    scope: ares.scope,
   });
 
-  authorization_code.save(function (err) {
-    if (err) return callback(err);
-    callback(null, authorization_code.code);
+  authorizationCode.save((err) => {
+    if (err) { callback(err); }
+    callback(null, authorizationCode.code);
   });
 }));
 
-server.exchange(oauth2orize.exchange.code(function (client, code, redirect_uri, callback) {
-  AuthorizationCode.findOne({ code }, function (err, authorization_code) {
-    if (err) return callback(err);
-    if (authorization_code === null) return callback(null, false);
-    if (client.client_id.toString() !== authorization_code.client_id) return callback(null, false);
-    if (redirect_uri !== authorization_code.redirect_uri) return callback(null, false);
+server.exchange(oauth2orize.exchange.code((client, code, redirectUri, callback) => {
+  AuthorizationCode.findOne({ code }, (err, authorizationCode) => {
+    if (err) { callback(err); }
+    if (authorizationCode === null) { callback(null, false); }
+    if (client.client_id.toString() !== authorizationCode.client_id) callback(null, false);
+    if (redirectUri !== authorizationCode.redirect_uri) callback(null, false);
 
-    authorization_code.remove(function (err) {
-      if (err) return callback(err);
+    authorizationCode.remove((removeError) => {
+      if (err) callback(removeError);
 
-      let token = new AccessToken({
+      const token = new AccessToken({
         token: crypto.randomBytes(32).toString('hex'),
-        client_id: authorization_code.client_id,
-        user_id: authorization_code.user_id
+        client_id: authorizationCode.client_id,
+        user_id: authorizationCode.user_id,
       });
 
-      token.save(function (err) {
-        if (err) return callback(err);
-        callback(null, token);
+      token.save((error) => {
+        if (error) return callback(error);
+        return callback(null, token);
       });
     });
   });
 }));
 
 exports.authorization = [
-  server.authorization(function (client_id, redirect_uri, callback) {
-    Client.findOne({ client_id: client_id }, function (err, client) {
+  server.authorization((clientId, redirectUri, callback) => {
+    Client.findOne({ client_id: clientId }, (err, client) => {
       if (err) return callback(err);
-      return callback(null, client, redirect_uri);
+      return callback(null, client, redirectUri);
     });
   }),
-  function (req, res) {
+
+  (req, res) => {
     res.render('dialog', { transaction_id: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
-  }
+  },
 ];
 
 exports.decision = [
-  server.decision()
+  server.decision(),
 ];
 
-const errFn = function (cb, err) {
-  if (err) return cb(err);
+const errFn = (cb, err) => {
+  if (err) cb(err);
 };
 
-const generateTokens = function ({ user, client }, done) {
-  let errorHandler = errFn.bind(undefined, done);
+const generateTokens = (user, client, done) => {
+  const errorHandler = errFn.bind(undefined, done);
   let refreshTokenValue;
   let token;
   let tokenValue;
 
   const model = {
     user_id: user._id,
-    client_id: client.client_id
+    client_id: client.client_id,
   };
 
-  AccessToken.deleteOne(model, function (err, removed) {
+  AccessToken.deleteOne(model, (err, removed) => {
     if (err) errorHandler(err, removed);
+
     tokenValue = crypto.randomBytes(32).toString('hex');
     refreshTokenValue = crypto.randomBytes(32).toString('hex');
 
     model.token = tokenValue;
+    model.refreshToken = refreshTokenValue;
+
     token = new AccessToken(model);
 
-    model.token = refreshTokenValue;
-
-    token.save().then(() => {
-      done(null, tokenValue, refreshTokenValue, {
-        'expires_in': config.limit.tokenLife,
+    token.save()
+      .then(() => done(null, tokenValue, refreshTokenValue, {
+        expires_in: config.limit.tokenLife,
         user,
-      });
-    }, function (err) {
-      if (err) return done(err);
-    })
+      }))
+      .catch((error) => done(error));
   });
 };
 
-server.exchange(oauth2orize.exchange.password(function (client, login, password, scope, done) {
+server.exchange(oauth2orize.exchange.password((client, login, password, scope, done) => {
   let query;
+
   if (isEmail(login)) query = { email: login };
   else query = { username: login };
-  User.findOne(query).then(function (user) {
-    if (!user || !user.checkPassword(password)) return done(null, false);
-    generateTokens({ user, client }, done);
-  }, function (error) {
-    return done(error);
-  })
+
+  User.findOne(query).then((user) => {
+    if (!user || !user.checkPassword(password)) { return done(null, false); }
+
+    return generateTokens(user, client, done);
+  }, (error) => done(error));
 }));
 
 exports.token = [
   server.token(),
-  server.errorHandler()
+  server.errorHandler(),
 ];

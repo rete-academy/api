@@ -1,7 +1,7 @@
-'use strict';
-
 const { createLogger, format, transports } = require('winston');
+
 const config = require('config');
+
 require('winston-daily-rotate-file');
 
 const logger = createLogger({
@@ -10,9 +10,9 @@ const logger = createLogger({
     format.colorize(),
     format.simple(),
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
+    format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`),
   ),
-  transports: [new transports.Console()]
+  transports: [new transports.Console()],
 });
 
 module.exports = logger;

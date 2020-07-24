@@ -1,5 +1,3 @@
-'use strict';
-
 const randomize = require('randomatic');
 const log = require('library/logger');
 const User = require('mongo/model/user');
@@ -14,39 +12,39 @@ const {
   // slugify,
 } = require('library/utils');
 
-const invalidRequest = function(req, res) {
+const invalidRequest = (req, res) => {
   defaultResponse(req, res, 405);
 };
 
-const findAll = async function(req, res) {
+const findAll = async (req, res) => {
   try {
     const allUsers = await User.findAll(req.query);
     defaultResponse(req, res, 200, filterUserData(req.user, allUsers));
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const findMe = async function(req, res) {
+const findMe = async (req, res) => {
   try {
     const me = await User.findOne({ email: req.user.email });
     defaultResponse(req, res, 200, { profile: me });
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const createNew = async function(req, res) {
+const createNew = async (req, res) => {
   try {
-    let user = req.body;
+    const user = req.body;
     // const usedUser = await User.findOne({ username: user.username });
     // if (!user.username || usedUser) {
     user.username = randomize('Aa0', 16);
 
     if (!req.body.email) throw new TypeError('Email is required.');
-        
+
     const found = await User.findByEmail(user.email);
     if (found) throw new TypeError('Email taken');
 
@@ -65,7 +63,7 @@ const createNew = async function(req, res) {
       placeholders: {
         TITLE: config.email.welcome.subject,
         CONTENT: config.email.welcome.content,
-        LINK: config.default.webUrl + '/confirm/' + confirm.code,
+        LINK: `${config.default.webUrl}/confirm/${confirm.code}`,
         CODE: confirm.code,
       },
       type: 'welcome',
@@ -79,7 +77,7 @@ const createNew = async function(req, res) {
   }
 };
 
-const sendConfirm = async function(req, res) {
+const sendConfirm = async (req, res) => {
   try {
     const email = checkRole(req.user, 'admin') ? req.body.email : req.user.email;
     if (!email) throw new TypeError('Email is required.');
@@ -101,13 +99,13 @@ const sendConfirm = async function(req, res) {
       placeholders: {
         TITLE: config.email.welcome.subject,
         CONTENT: config.email.welcome.content,
-        LINK: config.default.webUrl + '/confirm/' + newConfirm.code,
+        LINK: `${config.default.webUrl}/confirm/${newConfirm.code}`,
         CODE: newConfirm.code,
       },
       type: 'welcome',
     });
 
-    log.debug('New code created, email sent to ' + foundUser.email);
+    log.debug(`New code created, email sent to ${foundUser.email}`);
     defaultResponse(req, res, 201, 'Check email inbox');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -115,7 +113,7 @@ const sendConfirm = async function(req, res) {
   }
 };
 
-const confirmEmail = async function(req, res) {
+const confirmEmail = async (req, res) => {
   try {
     const found = await confirmationCode.findByCode(req.params.code);
     if (found.length <= 0 || confirmationCode.isExpired(found[0])) {
@@ -129,20 +127,20 @@ const confirmEmail = async function(req, res) {
         $set: {
           email: found[0].email,
           updatedTime: Date.now(),
-          'meta.confirm': true ,
+          'meta.confirm': true,
         },
       },
-      { new: true }
+      { new: true },
     );
     await confirmationCode.removeByUserId(confirmedUser._id);
-    defaultResponse( req, res, 201, 'Your email is confirmed!');
+    defaultResponse(req, res, 201, 'Your email is confirmed!');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const updateUser = async function(req, res) {
+const updateUser = async (req, res) => {
   log.silly('Start updating a user...');
   try {
     if (!checkRole(req.user, 'admin') && req.body.role) {
@@ -151,39 +149,39 @@ const updateUser = async function(req, res) {
     const updated = await User.updateById(req.params.id, req.body);
     log.debug('User was updated');
     defaultResponse(req, res, 200, updated);
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const updateStatus = async function(req, res) {
+const updateStatus = async (req, res) => {
   log.silly('Start updating material status...');
   try {
     if (req.body.role) { delete req.body.role; }
     await User.updateStatus(req.params.userId, req.body);
     log.debug('User was updated');
     defaultResponse(req, res, 200, 'OK');
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const updateProgress = async function(req, res) {
+const updateProgress = async (req, res) => {
   log.silly('Start updating user progress...');
   try {
     if (req.body.role) { delete req.body.role; }
     const updated = await User.updateProgress(req.params.userId, req.body);
     log.debug('User was updated');
     defaultResponse(req, res, 200, updated);
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const uploadAvatar = async function(req, res) {
+const uploadAvatar = async (req, res) => {
   try {
     if (req.file && req.user) {
       // the uploadToS3 will attach the result into req.file
@@ -195,7 +193,7 @@ const uploadAvatar = async function(req, res) {
             updatedTime: Date.now(),
           },
         },
-        { new: true }
+        { new: true },
       );
       defaultResponse(req, res, 200, updated);
     }
@@ -205,7 +203,7 @@ const uploadAvatar = async function(req, res) {
   }
 };
 
-const remove = async function(req, res) {
+const remove = async (req, res) => {
   log.silly('Start deleting user...');
   try {
     if (req.user.role.includes(0)) {
@@ -234,4 +232,3 @@ module.exports = {
   updateProgress,
   remove,
 };
-

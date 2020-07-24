@@ -1,9 +1,7 @@
-'use strict';
-
 require('dotenv').config();
 require('app-module-path').addPath(__dirname);
 
-const app  = require('express')();
+const app = require('express')();
 const bodyParser = require('body-parser');
 const config = require('config');
 const cors = require('cors');
@@ -50,11 +48,11 @@ const sessOptions = {
   secret: 'sessionSecret123',
   resave: false,
   saveUninitialized: true,
-  cookie: {}
+  cookie: {},
 };
 if (app.get('env') === 'production') {
-  app.set('trust proxy', 1) // trust first proxy
-  sessOptions.cookie.secure = true // serve secure cookies
+  app.set('trust proxy', 1); // trust first proxy
+  sessOptions.cookie.secure = true; // serve secure cookies
 }
 app.use(session(sessOptions));
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -68,21 +66,21 @@ app.use((req, res, next) => {
 require('routes/index')(app, passport);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  let err = new Error('Not Found');
+app.use((req, res, next) => {
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
 // error handler
-app.use(function (err, req, res) {
+app.use((err, req, res) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   res.status(err.status || 500).send({
     success: false,
-    message: 'Internal Server Error. ' + err.message,
+    message: `Internal Server Error. ${err.message}`,
   });
 });
 

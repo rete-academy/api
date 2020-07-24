@@ -1,5 +1,3 @@
-'use strict';
-
 const cors = require('cors');
 const RateLimit = require('express-rate-limit');
 
@@ -15,43 +13,42 @@ module.exports = function (app, passport) {
     windowMs: config.limit.oauthWindow,
     max: config.limit.oauthMax,
     delayMs: config.limit.oauthDelay,
-    message: "Use too many requests!",
+    message: 'Use too many requests!',
     statusCode: 429,
-    handler: function (req, res) {
+    handler(req, res) {
       if (optionsOauth.headers) {
         res.setHeader('Retry-After', Math.ceil(optionsOauth.windowMs / 1000));
       }
       res.format({
-        html: function () {
+        html() {
           res.status(optionsOauth.statusCode).end(optionsOauth.message);
         },
-        json: function () {
-          res.status(optionsOauth.statusCode).json({message: optionsOauth.message});
-        }
+        json() {
+          res.status(optionsOauth.statusCode).json({ message: optionsOauth.message });
+        },
       });
-    }
+    },
   };
 
   const optionsApi = {
     windowMs: config.limit.apiWindow,
     max: config.limit.apiMax,
     delayMs: config.limit.apiDelay,
-    message: "Use too many requests!",
+    message: 'Use too many requests!',
     statusCode: 429,
-    handler: function (req, res) {
-
+    handler(req, res) {
       if (optionsApi.headers) {
         res.setHeader('Retry-After', Math.ceil(optionsApi.windowMs / 1000));
       }
       res.format({
-        html: function () {
+        html() {
           res.status(optionsApi.statusCode).end(optionsApi.message);
         },
-        json: function () {
-          res.status(optionsApi.statusCode).json({message: optionsApi.message});
-        }
+        json() {
+          res.status(optionsApi.statusCode).json({ message: optionsApi.message });
+        },
       });
-    }
+    },
   };
 
   const limiterOauth = new RateLimit(optionsOauth);

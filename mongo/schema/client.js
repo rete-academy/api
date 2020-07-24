@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = {
   updated_time: Date,
   redirect_uri: String,

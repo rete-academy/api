@@ -1,10 +1,8 @@
-'use strict';
-
 const router = require('express').Router();
 const ctrl = require('../../controllers/clients');
 
-module.exports = function(passport) {
-  let auth = passport.authenticate(['bearer'], { session: false });
+module.exports = function (passport) {
+  const auth = passport.authenticate(['bearer'], { session: false });
 
   router.get('', auth, ctrl.findAll);
   router.post('', auth, ctrl.invalidRequest);

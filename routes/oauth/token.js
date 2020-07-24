@@ -1,12 +1,10 @@
-'use strict';
-
 const router = require('express').Router();
 const oauth2 = require('library/oauth2');
 const ctrl = require('controllers/tokens');
 
 module.exports = function (passport) {
-  let auth = passport.authenticate(['bearer'], { session: false });
-  let clientAuth = passport.authenticate('client-basic', { session: false });
+  const auth = passport.authenticate(['bearer'], { session: false });
+  const clientAuth = passport.authenticate('client-basic', { session: false });
 
   router.get('', auth, ctrl.findAll);
   router.post('', clientAuth, oauth2.token);

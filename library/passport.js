@@ -1,7 +1,5 @@
-'use strict';
-
 // const conf = require('config');
-const BasicStrategy = require('passport-http').BasicStrategy;
+const { BasicStrategy } = require('passport-http');
 const ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
@@ -21,11 +19,11 @@ const {
 } = require('library/strategy');
 
 module.exports = function (passport) {
-  passport.serializeUser(function(user, done) {
+  passport.serializeUser((user, done) => {
     done(null, user);
   });
 
-  passport.deserializeUser(function(user, done) {
+  passport.deserializeUser((user, done) => {
     done(null, user);
   });
   /*
@@ -43,111 +41,82 @@ module.exports = function (passport) {
 
  */
   passport.use('basic', new BasicStrategy(
-    function (username, password, done) {
-      User.findOne({ username: username }).then(function (user) {
+    (username, password, done) => {
+      User.findOne({ username }).then((user) => {
         if (!user || !user.checkPassword(password) || user.status > 1) {
           return done(null, false);
         }
         return done(null, user);
-      }, function (err) {
-        if (err) {
-          return done(err);
-        }
-      });
-    }
+      }, (err) => done(err));
+    },
   ));
 
   passport.use('client', new BasicStrategy(
-    function (client_id, client_secret, done) {
-      Client.findOne({client_id: client_id}).then(function (client) {
-        if (!client || client.client_secret !== client_secret) {
+    (clientId, clientSecret, done) => {
+      Client.findOne({ client_id: clientId }).then((client) => {
+        if (!client || client.client_secret !== clientSecret) {
           return done(null, false);
         }
         return done(null, client);
-      }, function (err) {
-        if (err) {
-          return done(err);
-        }
-      });
-    }
+      }, (err) => done(err));
+    },
   ));
 
   passport.use('client-basic', new ClientPasswordStrategy(
-    function (client_id, client_secret, done) {
-      Client.findOne({client_id: client_id}).then(function (client) {
+    (clientId, clientSecret, done) => {
+      Client.findOne({ client_id: clientId }).then((client) => {
         if (!client) return done(null, false);
-        if (client.client_secret !== client_secret) return done(null, false);
+        if (client.client_secret !== clientSecret) return done(null, false);
         return done(null, client);
-      }, function (err) {
-        if (err) {
-          return done(err);
-        }
-      });
-    }
+      }, (err) => done(err));
+    },
   ));
 
   passport.use('bearer', new BearerStrategy(
-    function (token, done) {
-      AccessToken.findOne({ token }).then(function (token) {
-        if (!token) return done(null, false);
-        if (Math.round((Date.now() - token.created_time) / 1000) > 2592000) {
-          AccessToken.deleteOne({ token }, function (err) {
-            if (err) return done(err);
-          });
-          return done(null, false, { message: 'Token expired' });
-        }
-        User.findOne({_id: token.user_id}).then(function (user) {
-          if (!user || user.status > 1)
-            return done(null, false, { message: 'Unknown user' });
+    (tokenStr, done) => {
+      AccessToken.findOne({ token: tokenStr }).then((token) => {
+        if (!token) done(null, false);
 
-          let info = {scope: '*'};
-          done(null, user, info);
-        }, function (error) {
-          return done(error);
-        });
-      }, function (err) {
-        if (err) return done(err);
-      });
-    }
+        if (Math.round((Date.now() - token.created_time) / 1000) > 2592000) {
+          AccessToken.deleteOne({ token }, (err) => done(err));
+          done(null, false, { message: 'Token expired' });
+        }
+
+        User.findOne({ _id: token.user_id }).then((user) => {
+          if (!user || user.status > 1) return done(null, false, { message: 'Unknown user' });
+
+          const info = { scope: '*' };
+          return done(null, user, info);
+        }, (error) => done(error));
+      }, (err) => done(err));
+    },
   ));
 
   passport.use('invitation', new InvitationStrategy(
-    function (code, done) {
-      Invitation.findOne({code: code}).then(function (code) {
-        if (!code) return done(null, false);
+    (code, done) => {
+      Invitation.findOne({ code }).then((foundCode) => {
+        if (!foundCode) return done(null, false);
         return done(null, code);
-      }).catch(function (err) {
-        if (err) {
-          return done(err);
-        }
-      });
-    }
+      }).catch((err) => done(err));
+    },
   ));
 
   passport.use('password-reset', new PasswordResetStrategy(
-    function (token, done) {
-      PasswordResetToken.findOne({token: token}).then(function (token) {
-        if (!token) return done(null, false);
+    (token, done) => {
+      PasswordResetToken.findOne({ token }).then((foundToken) => {
+        if (!foundToken) return done(null, false);
         return done(null, token);
-      }).catch(function (err) {
-        if (err) {
-          return done(err);
-        }
-      });
-    }
+      }).catch((err) => done(err));
+    },
   ));
-    
+
   passport.use('confirmation', new EmailConfirmationStrategy(
-    function (code, done) {
-      Confirmation.findByCode({ code: code }).then(function(code) {
-        if (!code) return done(null, false);
+    (code, done) => {
+      Confirmation.findByCode({ code }).then((foundCode) => {
+        if (!foundCode) return done(null, false);
         return done(null, code);
-      }).catch(function (err) {
-        if (err) {
-          return done(err);
-        }
-      });
-    }
+      }).catch((err) => done(err));
+    },
   ));
 
   passport.use('facebook', new FacebookStrategy(
@@ -158,10 +127,10 @@ module.exports = function (passport) {
       profileFields: ['id', 'displayName', 'photos', 'email'],
     },
     (accessToken, refreshToken, profile, done) => {
-      log.debug('login from FB ' + accessToken);
+      log.debug(`login from FB ${accessToken}`);
 
-      User.findOne({ 'provider.facebook.id': profile.id }).
-        then(async function(err, user) {
+      User.findOne({ 'provider.facebook.id': profile.id })
+        .then(async (err, user) => {
           if (err) {
             if (err) log.error(err);
             return done(err);
@@ -178,11 +147,10 @@ module.exports = function (passport) {
               },
             });
             return done(err, newUser);
-          } else {
-            log.debug('Found facebook user');
-            return done(err, user);
           }
+          log.debug('Found facebook user');
+          return done(err, user);
         });
-    }
+    },
   ));
 };

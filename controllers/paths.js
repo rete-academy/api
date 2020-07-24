@@ -1,7 +1,7 @@
 const {
   checkRole,
   isArray,
-  filterPathData,
+  sanitizePathData,
 } = require('library/utils');
 const log = require('library/logger');
 const Path = require('mongo/model/path');
@@ -22,7 +22,7 @@ const findAll = async (req, res) => {
   try {
     log.verbose('Start finding all paths');
     const allPaths = await Path.findAll(req.query);
-    defaultResponse(req, res, 200, filterPathData(req.user, allPaths));
+    defaultResponse(req, res, 200, sanitizePathData(req.user, allPaths));
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -33,7 +33,7 @@ const findSlug = async (req, res) => {
   try {
     log.verbose(`Start finding path with ${req.params.slug}`);
     const found = await Path.findSlug(req.params.slug);
-    if (found) defaultResponse(req, res, 200, filterPathData(req.user, found));
+    if (found) defaultResponse(req, res, 200, sanitizePathData(req.user, found));
     else defaultResponse(req, res, 404, 'Not Found');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);

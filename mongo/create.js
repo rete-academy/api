@@ -1,11 +1,8 @@
-'use strict';
-
-// const fs = require('fs');
-// const readline = require('readline');
 const randomize = require('randomatic');
 const config = require('config');
 const User = require('mongo/model/user');
 const Client = require('mongo/model/client');
+
 const emailService = require('library/email');
 const log = require('library/logger');
 
@@ -28,7 +25,7 @@ async function createAdmin() {
       email: config.default.email,
       role: [0],
       status: 1,
-      password: password,
+      password,
     });
     log.debug('Created first user');
 
@@ -52,7 +49,7 @@ async function createAdmin() {
       type: 'admin',
     });
     log.debug(`Sent email to ${config.default.email}`);
-  } catch(error) {
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     throw error;
   }
