@@ -1,12 +1,10 @@
-'use strict';
-
 const validate = require('mongoose-validator');
 const mongoose = require('mongoose');
 
 const nameValidator = [
   validate({
     validator: 'isLength',
-    arguments: [2, 30],
+    arguments: [1, 1000],
     message: 'Name should be between {ARGS[0]} and {ARGS[1]} characters',
   }),
   validate({
@@ -43,32 +41,23 @@ module.exports = {
   },
   role: {
     type: Array, // [0: admin, 1: normal]
-    default: [ 3 ],
+    default: [3],
     required: true,
   },
   address: {
     type: mongoose.Schema.Types.Mixed,
   },
   phone: {
-    type: String
+    type: String,
   },
-  progress: [
-    {
-      path: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'path',
-      },
-      sprint: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'sprint',
-      },
-      material: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'material',
-      },
-      status: 0,
-    },
-  ],
+  enrolled: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'path',
+  }],
+  progress: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'material',
+  }],
   preferences: {
     type: mongoose.Schema.Types.Mixed,
   },

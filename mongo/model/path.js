@@ -41,12 +41,12 @@ modelInstance.findSlug = async function (slug) {
     log.silly('Finding one path by slug');
     return await modelInstance.findOne({ slug })
       .sort({ name: 1 })
+      .populate('students')
       .populate('sprints')
       .populate({
         path: 'sprints',
         populate: { path: 'materials' },
-      })
-      .populate('students');
+      });
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     throw error;

@@ -1,5 +1,3 @@
-'use strict';
-
 const router = require('express').Router();
 const {
   invalidRequest,
@@ -16,7 +14,7 @@ const {
 
 module.exports = function (passport) {
   // let authClient = passport.authenticate(['client-basic', 'bearer'], { session: false });
-  let auth = passport.authenticate(['bearer'], { session: false });
+  const auth = passport.authenticate(['bearer'], { session: false });
 
   router.get('', findAll);
   router.get('/:slug', findSlug);

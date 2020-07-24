@@ -1,4 +1,3 @@
-'use strict';
 /*
  * Sprint schema definitions
  */
@@ -38,4 +37,3 @@ module.exports = {
     default: Date.now,
   },
 };
-

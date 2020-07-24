@@ -33,7 +33,7 @@ const findSlug = async (req, res) => {
   try {
     log.verbose(`Start finding path with ${req.params.slug}`);
     const found = await Path.findSlug(req.params.slug);
-    if (found) defaultResponse(req, res, 200, sanitizePathData(req.user, found));
+    if (found) defaultResponse(req, res, 200, sanitizePathData(req.user, [found]));
     else defaultResponse(req, res, 404, 'Not Found');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -46,15 +46,14 @@ const enroll = async (req, res) => {
   try {
     const updatedPath = await Path.enroll(req.params.id, req.body);
     const userIds = isArray(req.body.id) ? req.body.id : [req.body.id];
+
     const progressArray = updatedPath
-      .sprints.map((s) => (
-        s.materials.map((m) => ({
-          path: updatedPath._id,
-          sprint: s._id,
-          material: m._id,
-          status: 0,
-        }))
-      ))
+      .sprints.map((s) => s.materials.map((m) => ({
+        path: updatedPath._id,
+        sprint: s._id,
+        material: m._id,
+        status: 0,
+      })))
       .reduce((i, v) => i.concat(v), []); // flat it
 
     await Promise.all(userIds.map(async (userId) => {

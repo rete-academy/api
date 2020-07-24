@@ -45,20 +45,16 @@ schemaInstance.virtual('password').set(function (password) {
 const modelInstance = mongoose.model('user', schemaInstance);
 
 modelInstance.findAll = async (query) => {
-  try {
-    log.silly('Start finding all users');
-    return await modelInstance.find(query)
-      .populate('progress.path')
-      .populate('progress.sprint')
-      .populate('progress.material');
-  } catch (error) {
-    log.error(`${error.name}: ${error.message}`);
-    throw error;
-  }
+  log.silly('Start finding all users');
+
+  return modelInstance.find(query)
+    .populate('enroll')
+    .populate('progress');
 };
 
 modelInstance.findById = (id) => {
   log.silly(`Start finding user with id: ${id}`);
+
   return modelInstance.findOne({ _id: id })
     .then((result) => {
       log.silly('Found user.');
@@ -71,6 +67,7 @@ modelInstance.findById = (id) => {
 
 modelInstance.findByUsername = (username) => {
   log.silly(`Start finding user by username: ${username}`);
+
   return modelInstance.findOne({ username })
     .then((result) => {
       log.silly(`User with ${username} found.`);
@@ -92,15 +89,16 @@ modelInstance.findByEmail = async (email) => {
 };
 
 modelInstance.createNew = async (user) => {
-  log.silly('Start create a new user');
+  log.silly('Start creating a new user');
   user.created_time = Date.now();
   user.updated_time = Date.now();
   return modelInstance.create(user).catch((err) => console.log(err));
 };
 
 modelInstance.updateById = (id, doc) => {
-  log.silly(`Start update a user with id ${id}`);
-  const user = doc;
+  log.silly(`Start updating a user with id ${id}`);
+
+  const user = { ...doc };
   // Delete non-updatable fields from the request
   delete user.createdTime;
   delete user.hashedPassword;
@@ -108,51 +106,73 @@ modelInstance.updateById = (id, doc) => {
   delete user.__v;
   delete user._id;
 
+  // TODO: check password before save
+  // result.hashedPassword = result.encryptPassword(user.password);
+  // return result.save();
   return modelInstance.findOneAndUpdate({ _id: id }, user, { new: true })
     .then((result) => {
-      if (result === null) return Promise.reject(new Error('Not found'));
-      if (!user.password) return Promise.resolve(result);
-      result.hashedPassword = result.encryptPassword(user.password);
-      return result.save();
-    }).then((result) => Promise.resolve(result)).catch((error) => {
+      if (result === null) {
+        return Promise.reject(new Error('Not found'));
+      }
+      return Promise.resolve(result);
+    })
+    .catch((error) => {
       log.error(error.message);
       return Promise.reject(error.message);
     });
 };
 
-modelInstance.updateStatus = async (userId, doc) => {
-  try {
-    const updated = await modelInstance.findOneAndUpdate(
-      {
-        _id: userId,
-        'progress._id': doc.id,
-      },
-      { $set: { 'progress.$.status': doc.status } },
-      { new: true },
-    );
-    return updated;
-  } catch (error) {
-    log.error(`${error.name}: ${error.message}`);
-    throw error;
-  }
+// ids is path ids
+modelInstance.enroll = async (userId, ids) => {
+  log.silly('Start enrolling...');
+
+  return modelInstance.findOneAndUpdate(
+    { _id: userId },
+    {
+      $addToSet: { enrolled: { $each: isArray(ids) ? ids : [ids] } },
+      $inc: { 'meta.version': 1 },
+    },
+    { new: true },
+  );
 };
 
-modelInstance.updateProgress = async (userId, doc) => {
-  try {
-    log.silly('Start update a user progress...');
-    const data = isArray(doc) ? doc : [doc];
-    return await modelInstance.findOneAndUpdate(
-      { _id: userId },
-      {
-        $addToSet: { progress: { $each: data } },
-        $inc: { 'meta.version': 1 },
-      },
-      { new: true },
-    );
-  } catch (error) {
-    log.error(`${error.name}: ${error.message}`);
-    throw error;
-  }
+modelInstance.unenroll = async (userId, ids) => {
+  log.silly('Start unenrolling...');
+
+  return modelInstance.findOneAndUpdate(
+    { _id: userId },
+    {
+      $pull: { enrolled: { $in: isArray(ids) ? ids : [ids] } },
+      $inc: { 'meta.version': 1 },
+    },
+    { multi: true },
+  );
+};
+
+modelInstance.increaseProgress = async (userId, ids) => {
+  log.silly('Increase the progress...');
+
+  return modelInstance.findOneAndUpdate(
+    { _id: userId },
+    {
+      $addToSet: { progress: { $each: isArray(ids) ? ids : [ids] } },
+      $inc: { 'meta.version': 1 },
+    },
+    { new: true },
+  );
+};
+
+modelInstance.decreaseProgress = async (userId, ids) => {
+  log.silly('Decrease the progress...');
+
+  return modelInstance.findOneAndUpdate(
+    { _id: userId },
+    {
+      $pull: { progress: { $in: isArray(ids) ? ids : [ids] } },
+      $inc: { 'meta.version': 1 },
+    },
+    { multi: true },
+  );
 };
 
 modelInstance.removeById = (id) => {

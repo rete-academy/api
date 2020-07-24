@@ -142,13 +142,13 @@ const confirmEmail = async (req, res) => {
 
 const updateUser = async (req, res) => {
   log.silly('Start updating a user...');
+
   try {
-    if (!checkRole(req.user, 'admin') && req.body.role) {
-      delete req.body.role;
+    if (checkRole(req.user, 'admin') || req.params.id === req.user._id.toString()) {
+      const updated = await User.updateById(req.params.id, req.body);
+      defaultResponse(req, res, 200, updated);
+      log.debug('User was updated');
     }
-    const updated = await User.updateById(req.params.id, req.body);
-    log.debug('User was updated');
-    defaultResponse(req, res, 200, updated);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -162,6 +162,34 @@ const updateStatus = async (req, res) => {
     await User.updateStatus(req.params.userId, req.body);
     log.debug('User was updated');
     defaultResponse(req, res, 200, 'OK');
+  } catch (error) {
+    log.error(`${error.name}: ${error.message}`);
+    defaultResponse(req, res, error.httpStatusCode, error.message);
+  }
+};
+
+const enroll = async (req, res) => {
+  log.silly('Start enrolling...');
+
+  try {
+    const response = await User.enroll(req.params.id, req.body.data);
+    log.debug('User was updated');
+
+    defaultResponse(req, res, 200, response);
+  } catch (error) {
+    log.error(`${error.name}: ${error.message}`);
+    defaultResponse(req, res, error.httpStatusCode, error.message);
+  }
+};
+
+const unenroll = async (req, res) => {
+  log.silly('Start unenrolling...');
+
+  try {
+    const response = await User.unenroll(req.params.id, req.body.data);
+    log.debug('User was updated');
+
+    defaultResponse(req, res, 200, response);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -223,6 +251,10 @@ module.exports = {
   invalidRequest,
   findAll,
   findMe,
+  enroll,
+  unenroll,
+  // increaseProgress,
+  // decreaseProgress,
   uploadAvatar,
   createNew,
   updateUser,
