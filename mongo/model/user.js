@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const { isArray } = require('library/utils');
 const log = require('library/logger');
+const { isArray } = require('library/utils');
 
 const schemaDefinition = require('../schema/user');
 
@@ -22,16 +22,11 @@ const schemaInstance = mongoose.Schema(schemaDefinition, {
 });
 
 schemaInstance.methods.encryptPassword = function (password) {
+  console.log('### password:', password);
   return crypto.createHmac('sha1', this.salt.toString())
     .update(password)
     .digest('hex');
 };
-
-schemaInstance.virtual('password').set((password) => {
-  this._plainPassword = password;
-  this.salt = crypto.randomBytes(256).toString('hex');
-  this.hashedPassword = this.encryptPassword(password);
-}).get(() => this._plainPassword);
 
 schemaInstance.methods.checkPassword = function (password) {
   return this.encryptPassword(password) === this.hashedPassword;
@@ -40,6 +35,12 @@ schemaInstance.methods.checkPassword = function (password) {
 schemaInstance.methods.checkEmail = function (email) {
   return this.email === email;
 };
+
+schemaInstance.virtual('password').set(function (password) {
+  this._plainPassword = password;
+  this.salt = crypto.randomBytes(256).toString('hex');
+  this.hashedPassword = this.encryptPassword(password);
+}).get(() => this._plainPassword);
 
 const modelInstance = mongoose.model('user', schemaInstance);
 
@@ -91,16 +92,10 @@ modelInstance.findByEmail = async (email) => {
 };
 
 modelInstance.createNew = async (user) => {
-  try {
-    log.silly('Start create a new user');
-    // user.password = randomize('aA0!', 64);
-    user.created_time = Date.now();
-    user.updated_time = Date.now();
-    return await modelInstance.create(user);
-  } catch (error) {
-    log.error(error.message);
-    throw error;
-  }
+  log.silly('Start create a new user');
+  user.created_time = Date.now();
+  user.updated_time = Date.now();
+  return modelInstance.create(user).catch((err) => console.log(err));
 };
 
 modelInstance.updateById = (id, doc) => {

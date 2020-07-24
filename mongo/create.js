@@ -7,18 +7,11 @@ const emailService = require('library/email');
 const log = require('library/logger');
 
 async function createAdmin() {
-  try {
-    const foundUsers = await User.find();
-    const foundClients = await Client.find();
+  const foundUsers = await User.find();
+  const foundClients = await Client.find();
 
-    if (foundUsers.length > 0 && foundClients.length > 0) {
-      log.debug('Found admin user, stop.');
-      return;
-    }
-
+  if (foundUsers.length === 0) {
     const password = randomize('aA0!', 16);
-    const clientId = randomize('aA0', 32);
-    const clientSecret = randomize('aA0', 64);
 
     await User.createNew({
       username: config.default.username,
@@ -27,13 +20,8 @@ async function createAdmin() {
       status: 1,
       password,
     });
-    log.debug('Created first user');
 
-    await Client.createNew({
-      client_id: clientId,
-      client_secret: clientSecret,
-    });
-    log.debug('Created first client');
+    log.debug('Created first user');
 
     await emailService.sendMail({
       from: config.email.noreply,
@@ -43,15 +31,20 @@ async function createAdmin() {
       placeholders: {
         TITLE: 'ADMIN CREDENTIALS',
         PASSWORD: password,
-        CLIENT_ID: clientId,
-        CLIENT_SEC: clientSecret,
       },
       type: 'admin',
     });
+
     log.debug(`Sent email to ${config.default.email}`);
-  } catch (error) {
-    log.error(`${error.name}: ${error.message}`);
-    throw error;
+  }
+
+  if (foundClients.length === 0) {
+    await Client.createNew({
+      client_id: randomize('aA0', 32),
+      client_secret: randomize('aA0', 64),
+    });
+
+    log.debug('Created first client');
   }
 }
 
