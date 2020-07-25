@@ -4,6 +4,8 @@ const {
   confirmEmail,
   enroll,
   unenroll,
+  increaseProgress,
+  decreaseProgress,
   findAll,
   findMe,
   uploadAvatar,
@@ -34,6 +36,8 @@ module.exports = function (passport) {
   router.put('/:id', auth, updateUser);
   router.put('/:id/enroll', auth, enroll);
   router.put('/:id/unenroll', auth, unenroll);
+  router.put('/:id/increase', auth, increaseProgress);
+  router.put('/:id/decrease', auth, decreaseProgress);
   router.put('/:userId/update-status', auth, updateStatus);
   router.put('/:userId/update-progress', auth, updateProgress);
   router.delete('/:id', auth, remove);

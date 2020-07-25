@@ -173,7 +173,7 @@ const enroll = async (req, res) => {
 
   try {
     const response = await User.enroll(req.params.id, req.body.data);
-    log.debug('User was updated');
+    log.debug('User was enrolled.');
 
     defaultResponse(req, res, 200, response);
   } catch (error) {
@@ -187,7 +187,35 @@ const unenroll = async (req, res) => {
 
   try {
     const response = await User.unenroll(req.params.id, req.body.data);
-    log.debug('User was updated');
+    log.debug('User was unenrolled.');
+
+    defaultResponse(req, res, 200, response);
+  } catch (error) {
+    log.error(`${error.name}: ${error.message}`);
+    defaultResponse(req, res, error.httpStatusCode, error.message);
+  }
+};
+
+const increaseProgress = async (req, res) => {
+  log.silly('Start increasing...');
+
+  try {
+    const response = await User.increaseProgress(req.params.id, req.body.data);
+    log.debug('Progress was increased.');
+
+    defaultResponse(req, res, 200, response);
+  } catch (error) {
+    log.error(`${error.name}: ${error.message}`);
+    defaultResponse(req, res, error.httpStatusCode, error.message);
+  }
+};
+
+const decreaseProgress = async (req, res) => {
+  log.silly('Start increasing...');
+
+  try {
+    const response = await User.decreaseProgress(req.params.id, req.body.data);
+    log.debug('Progress was increased.');
 
     defaultResponse(req, res, 200, response);
   } catch (error) {
@@ -253,8 +281,8 @@ module.exports = {
   findMe,
   enroll,
   unenroll,
-  // increaseProgress,
-  // decreaseProgress,
+  increaseProgress,
+  decreaseProgress,
   uploadAvatar,
   createNew,
   updateUser,
