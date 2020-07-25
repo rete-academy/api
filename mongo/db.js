@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const log = require('library/logger');
 const { createAdmin } = require('./create');
 
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
 
 function handleConnect() {
   mongoose.connect(

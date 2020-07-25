@@ -10,7 +10,7 @@ const AuthorizationCode = require('mongo/model/authorization_code');
 const AccessToken = require('mongo/model/token');
 
 const server = oauth2orize.createServer();
-
+/*
 //  * add these things will make authentication process slow?
 server.serializeClient((client, done) => {
   done(null, client.clientId);
@@ -22,7 +22,7 @@ server.deserializeClient((id, done) => {
     return done(null, client);
   });
 });
-
+*/
 server.grant(oauth2orize.grant.code({
   scopeSeparator: [' ', ','],
 }, (client, redirectUri, user, ares, callback) => {

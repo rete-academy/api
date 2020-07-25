@@ -152,7 +152,7 @@ modelInstance.unenroll = async (userId, ids) => {
 modelInstance.increaseProgress = async (userId, ids) => {
   log.silly('Increase the progress...');
 
-  return modelInstance.findOneAndUpdate(
+  const response = await modelInstance.findOneAndUpdate(
     { _id: userId },
     {
       $addToSet: { progress: { $each: isArray(ids) ? ids : [ids] } },
@@ -160,6 +160,7 @@ modelInstance.increaseProgress = async (userId, ids) => {
     },
     { new: true },
   );
+  return response;
 };
 
 modelInstance.decreaseProgress = async (userId, ids) => {
