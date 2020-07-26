@@ -22,7 +22,6 @@ const schemaInstance = mongoose.Schema(schemaDefinition, {
 });
 
 schemaInstance.methods.encryptPassword = function (password) {
-  console.log('### password:', password);
   return crypto.createHmac('sha1', this.salt.toString())
     .update(password)
     .digest('hex');
@@ -105,14 +104,17 @@ modelInstance.updateById = (id, doc) => {
   // Delete non-updatable fields from the request
   delete user.createdTime;
   delete user.hashedPassword;
+  delete user.enrolled;
+  delete user.progress;
   delete user.salt;
   delete user.__v;
   delete user._id;
+  console.log('### user:', user);
 
   // TODO: check password before save
   // result.hashedPassword = result.encryptPassword(user.password);
   // return result.save();
-  return modelInstance.findOneAndUpdate({ _id: id }, user, { new: true })
+  return modelInstance.findOneAndUpdate({ _id: id }, user)
     .then((result) => {
       if (result === null) {
         return Promise.reject(new Error('Not found'));

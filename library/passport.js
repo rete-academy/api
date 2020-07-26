@@ -19,7 +19,6 @@ const {
 } = require('library/strategy');
 
 module.exports = function (passport) {
-  console.log('### passport:', passport);
   passport.serializeUser((user, done) => {
     done(null, user);
   });
@@ -55,10 +54,7 @@ module.exports = function (passport) {
 
   passport.use('client', new BasicStrategy(
     (clientId, clientSecret, done) => {
-      console.log('### clientSecret:', clientSecret);
-      console.log('### clientId:', clientId);
       Client.findOne({ client_id: clientId }).then((client) => {
-        console.log('### client:', client);
         if (client && client.client_secret === clientSecret) {
           return done(null, false);
         }
@@ -69,10 +65,7 @@ module.exports = function (passport) {
 
   passport.use('client-basic', new ClientPasswordStrategy(
     (clientId, clientSecret, done) => {
-      console.log('### clientSecret:', clientSecret);
-      console.log('### clientId:', clientId);
       Client.findOne({ client_id: clientId }).then((client) => {
-        console.log('### client:', client);
         if (!client) return done(null, false);
         if (client.client_secret !== clientSecret) return done(null, false);
         return done(null, client);

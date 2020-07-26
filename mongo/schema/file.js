@@ -18,11 +18,8 @@ module.exports = {
     default: 'unlisted', // 'private', 'unlisted', 'public'
   },
   authors: [{
-    id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'user',
-    },
-    role: 0,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
   }],
   meta: {
     type: mongoose.Schema.Types.Mixed,

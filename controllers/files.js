@@ -30,8 +30,7 @@ const findAll = async function (req, res) {
       ],
     };
 
-    const allFiles = await File.find(query);
-    console.log('### allFiles:', allFiles);
+    const allFiles = await File.find(query).populate('authors');
 
     defaultResponse(req, res, 200, allFiles);
   } catch (error) {
@@ -47,10 +46,7 @@ const uploadSingle = async function (req, res) {
       const value = {
         data: req.file,
         status: 'private',
-        authors: [{
-          id: req.user._id,
-          role: 0,
-        }],
+        authors: [req.user._id],
       };
       const newFile = await File.createNew(value);
       defaultResponse(req, res, 200, newFile);
@@ -64,15 +60,16 @@ const uploadSingle = async function (req, res) {
 const deleteFiles = async function (req, res) {
   try {
     log.verbose('Start deleting files...');
+    const { body, user } = req;
+
     let deleteObjects = [];
     let files;
-    files = await File.find({ _id: { $in: req.body.ids } });
-    // const userFiles = files.filter(o => o.author.toString() === req.user._id.toString());
+    files = await File.find({ _id: { $in: body.ids } });
 
-    if (checkRole(req.user, 'admin')) {
+    if (checkRole(user, 'admin')) {
       deleteObjects = files.map((o) => ({ Key: o.data.key }));
     } else {
-      files = files.filter((o) => o.author.toString() === req.user._id.toString());
+      files = files.filter((o) => o.authors.some((id) => id.toString() === user._id.toString()));
       deleteObjects = files.map((o) => ({ Key: o.data.key }));
     }
 

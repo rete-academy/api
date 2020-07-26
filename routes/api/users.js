@@ -11,7 +11,6 @@ const {
   uploadAvatar,
   updateUser,
   updateStatus,
-  updateProgress,
   createNew,
   remove,
   sendConfirm,
@@ -39,7 +38,6 @@ module.exports = function (passport) {
   router.put('/:id/increase', auth, increaseProgress);
   router.put('/:id/decrease', auth, decreaseProgress);
   router.put('/:userId/update-status', auth, updateStatus);
-  router.put('/:userId/update-progress', auth, updateProgress);
   router.delete('/:id', auth, remove);
 
   return router;

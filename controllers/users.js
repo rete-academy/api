@@ -16,6 +16,7 @@ const invalidRequest = (req, res) => {
   defaultResponse(req, res, 405);
 };
 
+// Make this become search/pagination because findAll is dangerous
 const findAll = async (req, res) => {
   try {
     const allUsers = await User.findAll(req.query);
@@ -234,19 +235,6 @@ const decreaseProgress = async (req, res) => {
   }
 };
 
-const updateProgress = async (req, res) => {
-  log.silly('Start updating user progress...');
-  try {
-    if (req.body.role) { delete req.body.role; }
-    const updated = await User.updateProgress(req.params.userId, req.body);
-    log.debug('User was updated');
-    defaultResponse(req, res, 200, updated);
-  } catch (error) {
-    log.error(`${error.name}: ${error.message}`);
-    defaultResponse(req, res, error.httpStatusCode, error.message);
-  }
-};
-
 const uploadAvatar = async (req, res) => {
   try {
     if (req.file && req.user) {
@@ -299,6 +287,5 @@ module.exports = {
   sendConfirm,
   confirmEmail,
   updateStatus,
-  updateProgress,
   remove,
 };

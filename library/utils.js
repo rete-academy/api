@@ -97,10 +97,7 @@ const isAdmin = (auth) => !!auth && auth.role && auth.role.includes(0);
 
 function filterUserData(auth, results) {
   if (auth.email) { // only allow registered user
-    if (auth.role.includes(0)) { // only admin can see all
-      return results;
-    }
-    return [auth]; // normal user only see himself
+    return results.filter((o) => Math.min(...o.role) >= Math.min(...auth.role));
   }
   return 'Not allowed';
 }
