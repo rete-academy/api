@@ -1,10 +1,8 @@
-'use strict';
-
 const util = require('util');
 const Strategy = require('passport-strategy');
 
 function PasswordResetStrategy(options, verify) {
-  if (typeof options == 'function') {
+  if (typeof options === 'function') {
     verify = options;
     options = {};
   }
@@ -19,7 +17,7 @@ function PasswordResetStrategy(options, verify) {
 }
 
 function InvitationStrategy(options, verify) {
-  if (typeof options == 'function') {
+  if (typeof options === 'function') {
     verify = options;
     options = {};
   }
@@ -45,15 +43,15 @@ util.inherits(EmailConfirmationStrategy, Strategy);
  * @param {Object} req
  * @api protected
  */
-PasswordResetStrategy.prototype.authenticate = function(req) {
+PasswordResetStrategy.prototype.authenticate = function (req) {
   // const options = opt || {};
-  //Looking for this._tokenField inside both request queries and request bodies
-  var resetToken = lookup(req.body, this._tokenField) || lookup(req.query, this._tokenField);
+  // Looking for this._tokenField inside both request queries and request bodies
+  const resetToken = lookup(req.body, this._tokenField) || lookup(req.query, this._tokenField);
   if (!resetToken) {
-    return this.fail(new Error("Missing password reset token"));
+    return this.fail(new Error('Missing password reset token'));
   }
 
-  var self = this;
+  const self = this;
 
   function verified(err, user, info) {
     if (err) { return self.error(err); }
@@ -69,12 +67,13 @@ PasswordResetStrategy.prototype.authenticate = function(req) {
 
   function lookup(obj, field) {
     if (!obj) { return null; }
-    var chain = field.split(']').join('').split('[');
-    for (var i = 0, len = chain.length; i < len; i++) {
-      var prop = obj[chain[i]];
-      if (typeof(prop) === 'undefined') { return null; }
-      if (typeof(prop) !== 'object') {
-        return prop; }
+    const chain = field.split(']').join('').split('[');
+    for (let i = 0, len = chain.length; i < len; i++) {
+      const prop = obj[chain[i]];
+      if (typeof (prop) === 'undefined') { return null; }
+      if (typeof (prop) !== 'object') {
+        return prop;
+      }
       obj = prop;
     }
     return null;
@@ -86,15 +85,15 @@ PasswordResetStrategy.prototype.authenticate = function(req) {
  * @param {Object} req
  * @api protected
  */
-InvitationStrategy.prototype.authenticate = function(req) {
+InvitationStrategy.prototype.authenticate = function (req) {
   // options = options || {};
-  //Looking for this._invitationCodeField inside both request queries and request bodies
-  var invitationCode = lookup(req.body, this._invitationCodeField) || lookup(req.query, this._invitationCodeField);
+  // Looking for this._invitationCodeField inside both request queries and request bodies
+  const invitationCode = lookup(req.body, this._invitationCodeField) || lookup(req.query, this._invitationCodeField);
   if (!invitationCode) {
-    return this.fail(new Error("Missing invitation code"));
+    return this.fail(new Error('Missing invitation code'));
   }
 
-  var self = this;
+  const self = this;
 
   function verified(err, user, info) {
     if (err) { return self.error(err); }
@@ -110,19 +109,20 @@ InvitationStrategy.prototype.authenticate = function(req) {
 
   function lookup(obj, field) {
     if (!obj) { return null; }
-    var chain = field.split(']').join('').split('[');
-    for (var i = 0, len = chain.length; i < len; i++) {
-      var prop = obj[chain[i]];
-      if (typeof(prop) === 'undefined') { return null; }
-      if (typeof(prop) !== 'object') {
-        return prop; }
+    const chain = field.split(']').join('').split('[');
+    for (let i = 0, len = chain.length; i < len; i++) {
+      const prop = obj[chain[i]];
+      if (typeof (prop) === 'undefined') { return null; }
+      if (typeof (prop) !== 'object') {
+        return prop;
+      }
       obj = prop;
     }
     return null;
   }
 };
 
-EmailConfirmationStrategy.prototype.authenticate = function() {}
+EmailConfirmationStrategy.prototype.authenticate = function () {};
 
 // Expose Strategy constructor
 module.exports = {

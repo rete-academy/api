@@ -8,7 +8,6 @@ const {
   // getDomainFromUrl,
   defaultResponse,
   promiseRejectWithError,
-  strengthCheck,
 } = require('library/utils');
 
 module.exports.invalidRequest = function (req, res) {

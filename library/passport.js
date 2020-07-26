@@ -19,6 +19,7 @@ const {
 } = require('library/strategy');
 
 module.exports = function (passport) {
+  console.log('### passport:', passport);
   passport.serializeUser((user, done) => {
     done(null, user);
   });
@@ -26,8 +27,9 @@ module.exports = function (passport) {
   passport.deserializeUser((user, done) => {
     done(null, user);
   });
+
   /*
- * add these things will make authentication process slow?
+   * add these things will make authentication process slow?
     passport.serializeUser(function(user, done) {
         done(null, user._id);
     });
@@ -38,8 +40,8 @@ module.exports = function (passport) {
             done(null, user);
         });
     });
+  */
 
- */
   passport.use('basic', new BasicStrategy(
     (username, password, done) => {
       User.findOne({ username }).then((user) => {
@@ -53,18 +55,24 @@ module.exports = function (passport) {
 
   passport.use('client', new BasicStrategy(
     (clientId, clientSecret, done) => {
+      console.log('### clientSecret:', clientSecret);
+      console.log('### clientId:', clientId);
       Client.findOne({ client_id: clientId }).then((client) => {
-        if (!client || client.client_secret !== clientSecret) {
+        console.log('### client:', client);
+        if (client && client.client_secret === clientSecret) {
           return done(null, false);
         }
-        return done(null, client);
-      }, (err) => done(err));
+        return done(null, false);
+      });
     },
   ));
 
   passport.use('client-basic', new ClientPasswordStrategy(
     (clientId, clientSecret, done) => {
+      console.log('### clientSecret:', clientSecret);
+      console.log('### clientId:', clientId);
       Client.findOne({ client_id: clientId }).then((client) => {
+        console.log('### client:', client);
         if (!client) return done(null, false);
         if (client.client_secret !== clientSecret) return done(null, false);
         return done(null, client);
@@ -83,7 +91,9 @@ module.exports = function (passport) {
         }
 
         User.findOne({ _id: token.user_id }).then((user) => {
-          if (!user || user.status > 1) return done(null, false, { message: 'Unknown user' });
+          if (!user || user.status > 1) {
+            return done(null, false, { message: 'Unknown user' });
+          }
 
           const info = { scope: '*' };
           return done(null, user, info);

@@ -1,38 +1,19 @@
 const validate = require('mongoose-validator');
 const mongoose = require('mongoose');
 
-const nameValidator = [
-  validate({
-    validator: 'isLength',
-    arguments: [1, 1000],
-    message: 'Name should be between {ARGS[0]} and {ARGS[1]} characters',
-  }),
-  validate({
-    validator: 'isAlphanumeric',
-    passIfEmpty: false,
-    message: 'Name should contain alpha-numeric characters only',
-  }),
-];
-
-const emailValidator = validate({
-  validator: 'isEmail',
-  message: 'Must be valid email address',
-});
-
 module.exports = {
-  username: {
-    type: String,
-    validate: nameValidator,
-  },
   email: {
     type: String,
     required: true,
     unique: true,
-    validate: emailValidator,
+    validate: validate({
+      validator: 'isEmail',
+      message: 'Must be valid email address',
+    }),
   },
-  name: {
-    type: String,
-  },
+  name: String,
+  username: String,
+  phone: String,
   avatar: {
     type: mongoose.Schema.Types.Mixed,
   },
@@ -48,9 +29,6 @@ module.exports = {
   },
   address: {
     type: mongoose.Schema.Types.Mixed,
-  },
-  phone: {
-    type: String,
   },
   enrolled: [{
     type: mongoose.Schema.Types.ObjectId,

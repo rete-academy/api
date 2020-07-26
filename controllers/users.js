@@ -9,7 +9,7 @@ const {
   checkRole,
   defaultResponse,
   filterUserData,
-  // slugify,
+  slugify,
 } = require('library/utils');
 
 const invalidRequest = (req, res) => {
@@ -39,21 +39,30 @@ const findMe = async (req, res) => {
 const createNew = async (req, res) => {
   try {
     const user = req.body;
-    // const usedUser = await User.findOne({ username: user.username });
-    // if (!user.username || usedUser) {
-    user.username = randomize('Aa0', 16);
 
-    if (!req.body.email) throw new TypeError('Email is required.');
+    if (!user.username) {
+      user.username = `${slugify(user.name)}${randomize('a0', 6)}`;
+    }
+
+    if (!req.body.email) {
+      throw new TypeError('Email is required.');
+    }
 
     const found = await User.findByEmail(user.email);
-    if (found) throw new TypeError('Email taken');
+    if (found) {
+      throw new TypeError('Email taken');
+    }
 
     const createdUser = await User.createNew(user);
+
+    log.debug('Create new user, phase 1: User created.');
 
     const confirm = await confirmationCode.createNew({
       userId: createdUser._id,
       email: createdUser.email,
     });
+
+    log.debug('Create new user, phase 2: Code created.');
 
     await emailService.sendMail({
       from: config.email.noreply,
@@ -69,7 +78,8 @@ const createNew = async (req, res) => {
       type: 'welcome',
     });
 
-    log.debug('User created, code created, email sent');
+    log.debug('Create new user, phase 3: Email sent.');
+
     defaultResponse(req, res, 201, 'Check email inbox');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);

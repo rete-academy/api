@@ -1,7 +1,6 @@
 const {
   checkRole,
   isArray,
-  sanitizePathData,
 } = require('library/utils');
 const log = require('library/logger');
 const Path = require('mongo/model/path');
@@ -34,7 +33,7 @@ const findSlug = async (req, res) => {
   try {
     log.verbose(`Start finding path with ${req.params.slug}`);
     const found = await Path.findSlug(req.params.slug);
-    if (found) defaultResponse(req, res, 200, sanitizePathData(req.user, [found]));
+    if (found) defaultResponse(req, res, 200, [found]);
     else defaultResponse(req, res, 404, 'Not Found');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);

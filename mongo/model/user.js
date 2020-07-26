@@ -89,10 +89,13 @@ modelInstance.findByEmail = async (email) => {
 };
 
 modelInstance.createNew = async (user) => {
-  log.silly('Start creating a new user');
-  user.created_time = Date.now();
-  user.updated_time = Date.now();
-  return modelInstance.create(user).catch((err) => console.log(err));
+  try {
+    log.silly('Start creating a new user');
+    return modelInstance.create(user);
+  } catch (error) {
+    log.error(`${error.name}: ${error.message}`);
+    throw error;
+  }
 };
 
 modelInstance.updateById = (id, doc) => {
