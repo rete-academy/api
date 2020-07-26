@@ -1,16 +1,14 @@
-'use strict';
-
 module.exports = {
-  created_time: {
+  createdTime: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   user_id: {
     type: String,
-    required: true
+    required: true,
   },
   token: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 };

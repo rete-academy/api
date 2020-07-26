@@ -39,8 +39,10 @@ module.exports = {
   provider: {
     type: mongoose.Schema.Types.Mixed,
   },
+
+  // [0: admin, 1: instructor, 2: user, 3: new]
   role: {
-    type: Array, // [0: admin, 1: normal]
+    type: Array,
     default: [3],
     required: true,
   },

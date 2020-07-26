@@ -95,21 +95,6 @@ function slugify(value) {
 
 const isAdmin = (auth) => !!auth && auth.role && auth.role.includes(0);
 
-function sanitizePathData(auth, results) {
-  const data = JSON.parse(JSON.stringify(results));
-  // Only admin can see students info
-  // otherwise, remove students info out of results
-  return data.map((o) => ({
-    ...o,
-    students: isAdmin(auth) ? o.students : undefined,
-  }));
-}
-
-function sanitizeFiles(auth, results) {
-  const data = JSON.parse(JSON.stringify(results));
-  return data.filter((o) => isAdmin(auth) || o.author._id === auth._id.toString());
-}
-
 function filterUserData(auth, results) {
   if (auth.email) { // only allow registered user
     if (auth.role.includes(0)) { // only admin can see all
@@ -142,9 +127,7 @@ module.exports = {
   checkRole,
   promiseRejectWithError,
   defaultResponse,
-  sanitizePathData,
   filterUserData,
-  sanitizeFiles,
   getDomainFromUrl,
   notifyAdmin,
   slugify,

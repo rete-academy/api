@@ -22,7 +22,8 @@ const findAll = async (req, res) => {
   try {
     log.verbose('Start finding all paths');
     const allPaths = await Path.findAll(req.query);
-    defaultResponse(req, res, 200, sanitizePathData(req.user, allPaths));
+    console.log('### allPaths:', allPaths);
+    defaultResponse(req, res, 200, allPaths);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);

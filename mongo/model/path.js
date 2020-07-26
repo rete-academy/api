@@ -6,7 +6,6 @@ const log = require('library/logger');
 const schemaDefinition = require('../schema/path');
 
 const transform = function (doc, ret) {
-  ret.meta.students = doc.students.length;
   delete ret.__v;
   return ret;
 };
@@ -22,26 +21,9 @@ const modelInstance = mongoose.model('path', schemaInstance);
 modelInstance.findAll = async function (query) {
   try {
     log.silly('Finding paths');
+
     return await modelInstance.find(query)
       .sort({ name: 1 })
-      .populate('sprints')
-      .populate({
-        path: 'sprints',
-        populate: { path: 'materials' },
-      })
-      .populate('students');
-  } catch (error) {
-    log.error(`${error.name}: ${error.message}`);
-    throw error;
-  }
-};
-
-modelInstance.findSlug = async function (slug) {
-  try {
-    log.silly('Finding one path by slug');
-    return await modelInstance.findOne({ slug })
-      .sort({ name: 1 })
-      .populate('students')
       .populate('sprints')
       .populate({
         path: 'sprints',
@@ -53,48 +35,18 @@ modelInstance.findSlug = async function (slug) {
   }
 };
 
-modelInstance.enroll = async function (id, doc) {
+modelInstance.findSlug = async function (slug) {
   try {
-    log.silly(`Updating a path with id ${id}`);
-    const data = isArray(doc.id) ? doc.id : [doc.id];
-    const found = await modelInstance.findOne({ _id: id });
-    const userIds = found.students.map((i) => i.toString());
-    const newIds = data.filter((i) => !userIds.includes(i));
-    return await modelInstance.findOneAndUpdate(
-      { _id: id },
-      {
-        $addToSet: { students: { $each: newIds } },
-        $inc: { 'meta.version': 1 },
-      },
-      { new: true },
-    )
+    log.silly('Finding one path by slug');
+    return await modelInstance.findOne({ slug })
       .sort({ name: 1 })
-      .populate('sprints');
+      .populate('sprints')
+      .populate({
+        path: 'sprints',
+        populate: { path: 'materials' },
+      });
   } catch (error) {
-    log.error(`[Enroll model] ${error.name}: ${error.message}`);
-    throw error;
-  }
-};
-
-modelInstance.unenroll = async function (id, doc) {
-  try {
-    log.silly(`Updating a path with id ${id}`);
-    const data = isArray(doc.id) ? doc.id : [doc.id];
-    const found = await modelInstance.findOne({ _id: id });
-    const userIds = found.students.map((i) => i.toString());
-    const matchedIds = data.filter((i) => userIds.includes(i));
-    return await modelInstance.findOneAndUpdate(
-      { _id: id },
-      {
-        $pull: { students: { $in: matchedIds } },
-        $inc: { 'meta.version': 1 },
-      },
-      { new: true },
-    )
-      .sort({ name: 1 })
-      .populate('sprints');
-  } catch (error) {
-    log.error(`[Unenroll model] ${error.name}: ${error.message}`);
+    log.error(`${error.name}: ${error.message}`);
     throw error;
   }
 };

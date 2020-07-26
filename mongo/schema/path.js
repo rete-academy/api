@@ -16,18 +16,14 @@ module.exports = {
   image: {
     type: String,
   },
-  sprints: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'sprint',
-    },
-  ],
-  students: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'user',
-    },
-  ],
+  sprints: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'sprint',
+  }],
+  authors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+  }],
   preferences: {
     type: mongoose.Schema.Types.Mixed,
   },

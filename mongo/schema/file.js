@@ -1,5 +1,3 @@
-'use strict';
-
 const mongoose = require('mongoose');
 
 module.exports = {
@@ -17,12 +15,15 @@ module.exports = {
   status: {
     type: String,
     required: true,
-    default: 'public' // 'private', 'unlisted'
+    default: 'unlisted', // 'private', 'unlisted', 'public'
   },
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-  },
+  authors: [{
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+    },
+    role: 0,
+  }],
   meta: {
     type: mongoose.Schema.Types.Mixed,
     default: {

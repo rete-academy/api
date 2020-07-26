@@ -6,8 +6,8 @@ const { deleteFromS3 } = require('library/aws');
 
 const {
   checkRole,
-  sanitizeFiles,
   defaultResponse,
+  isAdmin,
 } = require('library/utils');
 
 const invalidRequest = function (req, res) {
@@ -16,9 +16,24 @@ const invalidRequest = function (req, res) {
 
 const findAll = async function (req, res) {
   try {
-    log.verbose('Start finding all file');
-    const allFiles = await File.findAll(req.query);
-    defaultResponse(req, res, 200, sanitizeFiles(req.user, allFiles));
+    log.verbose('Start finding all files');
+
+    const query = isAdmin(req.user) ? req.query : {
+      $and: [
+        req.query,
+        {
+          $or: [
+            { authors: { $elemMatch: { id: req.user._id } } },
+            { status: 'public' },
+          ],
+        },
+      ],
+    };
+
+    const allFiles = await File.find(query);
+    console.log('### allFiles:', allFiles);
+
+    defaultResponse(req, res, 200, allFiles);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -31,8 +46,11 @@ const uploadSingle = async function (req, res) {
       // the uploadToS3 will attach the result into req.file
       const value = {
         data: req.file,
-        status: 'public',
-        author: req.user._id,
+        status: 'private',
+        authors: [{
+          id: req.user._id,
+          role: 0,
+        }],
       };
       const newFile = await File.createNew(value);
       defaultResponse(req, res, 200, newFile);

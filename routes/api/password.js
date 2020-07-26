@@ -1,11 +1,9 @@
-'use strict';
-
 const router = require('express').Router();
 const ctrl = require('controllers/passwords');
 
 module.exports = function (passport) {
-  let auth = passport.authenticate(['basic', 'bearer'], {session: false});
-  let auth_reset = passport.authenticate(['password-reset'], {session: false});
+  const auth = passport.authenticate(['basic', 'bearer'], { session: false });
+  const authReset = passport.authenticate(['password-reset'], { session: false });
 
   router.get('', auth, ctrl.invalidRequest);
   router.post('', auth, ctrl.invalidRequest);
@@ -13,7 +11,7 @@ module.exports = function (passport) {
   router.delete('', auth, ctrl.invalidRequest);
 
   router.post('/forgot', ctrl.forgot);
-  router.post('/reset', auth_reset, ctrl.reset);
+  router.post('/reset', authReset, ctrl.reset);
 
   router.get('/:id', auth, ctrl.invalidRequest);
   router.post('/:id', auth, ctrl.invalidRequest);
