@@ -102,16 +102,24 @@ function filterUserData(auth, results) {
   return 'Not allowed';
 }
 
-function checkRole(user, string) {
-  if (user && user.role && string) {
-    const roleValue = user.role.reduce((i, j) => i * j);
-    switch (string) {
+function checkRole(user, role) {
+  if (user && user.role && role) {
+    switch (role) {
       case 'admin':
-        if (roleValue === 0) return true;
-        return false;
+      case 0:
+        return user.role.some((n) => n === 0);
+      case 'teacher':
+      case 'mod':
+      case 1:
+        return user.role.some((n) => n === 1 || n === 0);
       case 'student':
-        if (roleValue > 3) return true;
-        return false;
+      case 'user':
+      case 2:
+        return user.role.some((n) => n === 2 || n === 0);
+      case 'unconfirmed':
+      case 'new-user':
+      case 3:
+        return user.role.some((n) => n === 3 || n === 0);
       default:
         return false;
     }

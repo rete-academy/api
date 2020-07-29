@@ -1,3 +1,4 @@
+const randomize = require('randomatic');
 const {
   checkRole,
   isArray,
@@ -18,10 +19,25 @@ const invalidRequest = (req, res) => {
 };
 
 const findAll = async (req, res) => {
+  log.verbose('Start finding all paths');
   try {
-    log.verbose('Start finding all paths');
     const allPaths = await Path.findAll(req.query);
-    defaultResponse(req, res, 200, allPaths);
+    const filteredPaths = allPaths.filter((p) => {
+      console.log('### user', req.user);
+      console.log('### path', p);
+      if (checkRole(req.user, 'admin')) {
+        return true;
+      }
+      if (p.status === 'public') {
+        return true;
+      }
+      if (p.authors.some((a) => a._id.toString() === req.user._id.toString())) {
+        console.log('### is authors', p.authors);
+        return true;
+      }
+      return false;
+    });
+    defaultResponse(req, res, 200, filteredPaths);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -93,10 +109,12 @@ const unenroll = async (req, res) => {
 const createPath = async (req, res) => {
   log.silly('Start creating a path...');
   try {
-    if (checkRole(req.user, 'admin')) {
-      req.body.slug = slugify(req.body.name);
-      const createdSprint = await Path.createNew(req.body);
-      log.debug('New Path was created');
+    const { body, user } = req;
+    if (checkRole(user, 'teacher')) {
+      body.slug = `${slugify(body.name)}-${randomize('a0', 5)}`;
+      body.authors = [user._id];
+      const createdSprint = await Path.createNew(body);
+      log.debug('New path was created');
       defaultResponse(req, res, 201, createdSprint);
     } else {
       defaultResponse(req, res, 403);
@@ -111,7 +129,7 @@ const updatePath = async (req, res) => {
   log.silly('Start updating a path...');
   try {
     delete req.body.sprints;
-    if (checkRole(req.user, 'admin')) {
+    if (checkRole(req.user, 'teacher')) {
       const updated = await Path.updateById(req.params.id, req.body);
       log.debug('Path was updated');
       defaultResponse(req, res, 200, updated);

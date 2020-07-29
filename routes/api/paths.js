@@ -16,8 +16,8 @@ module.exports = function (passport) {
   // let authClient = passport.authenticate(['client-basic', 'bearer'], { session: false });
   const auth = passport.authenticate(['bearer'], { session: false });
 
-  router.get('', findAll);
-  router.get('/:slug', findSlug);
+  router.get('', auth, findAll);
+  router.get('/:slug', auth, findSlug);
   router.post('', auth, createPath);
   router.put('', auth, invalidRequest);
   router.delete('', auth, invalidRequest);

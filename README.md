@@ -1,4 +1,4 @@
-# Template API
+# Rete Academy API
 
 ### Getting start
 ```
@@ -40,13 +40,11 @@ FB_APP_CALLBACK=http://localhost:3000/oauth/facebook/callback
 ```
 
 ## Create new endpoint
-Create new file under `/routes/api/` folder. File name will be the path.
+Create new file under `/routes/api/` folder.
 ```
-File:                           Endpoint:
-  /routes/api/users.js            /api/users
-  /routes/api/clients.js          /api/clients
-  /routes/oauth/token.js          /oauth/token
+File:                           
+  /routes/api/users.js
 ```
 
 ## API
-Download `docs/Rete_Academy.postman_collection.json` file, then import it into Postman to have a full collection of requests.
+Download `docs/Rete_Academy.postman_collection.json` file, then import it into Postman.

@@ -16,10 +16,6 @@ module.exports = {
   image: {
     type: String,
   },
-  sprints: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'sprint',
-  }],
   authors: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
@@ -27,12 +23,20 @@ module.exports = {
   preferences: {
     type: mongoose.Schema.Types.Mixed,
   },
+  sprints: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'sprint',
+  }],
   meta: {
     type: mongoose.Schema.Types.Mixed,
     default: {
       version: 1,
       position: {},
     },
+  },
+  status: {
+    type: String,
+    default: 'public',
   },
   createdTime: {
     type: Date,

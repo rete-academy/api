@@ -24,6 +24,7 @@ modelInstance.findAll = async function (query) {
 
     return await modelInstance.find(query)
       .sort({ name: 1 })
+      .populate('authors')
       .populate('sprints')
       .populate({
         path: 'sprints',
