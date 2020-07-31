@@ -37,7 +37,7 @@ modelInstance.findAll = async function (query) {
 
 modelInstance.findByCode = async function (code) {
   try {
-    log.silly(`Finding code ${code}`);
+    log.silly('Finding code...');
     // return await modelInstance.find({ code: code })
     //     .limit(1).maxTimeMS(1000);
     return await modelInstance.find({ code }).exec();
