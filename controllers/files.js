@@ -1,13 +1,11 @@
 const log = require('library/logger');
 const File = require('mongo/model/file');
 const { deleteFromS3 } = require('library/aws');
-// const User = require('mongo/model/user');
-// const config = require('config');
 
 const {
+  checkAuthor,
   checkRole,
   defaultResponse,
-  isAdmin,
 } = require('library/utils');
 
 const invalidRequest = function (req, res) {
@@ -18,7 +16,7 @@ const findAll = async function (req, res) {
   try {
     log.verbose('Start finding all files');
 
-    const query = isAdmin(req.user) ? req.query : {
+    const query = checkRole(req.user, 'admin') ? req.query : {
       $and: [
         req.query,
         {
@@ -63,14 +61,15 @@ const deleteFiles = async function (req, res) {
     const { body, user } = req;
 
     let deleteObjects = [];
-    let files;
-    files = await File.find({ _id: { $in: body.ids } });
 
-    if (checkRole(user, 'admin')) {
+    const files = await File.find({ _id: { $in: body.ids } });
+
+    if (checkRole(user, 'teacher')) {
       deleteObjects = files.map((o) => ({ Key: o.data.key }));
     } else {
-      files = files.filter((o) => o.authors.some((id) => id.toString() === user._id.toString()));
-      deleteObjects = files.map((o) => ({ Key: o.data.key }));
+      deleteObjects = files
+        .filter((o) => checkAuthor(user, o))
+        .map((o) => ({ Key: o.data.key }));
     }
 
     const deleteParams = {

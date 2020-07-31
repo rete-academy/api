@@ -1,6 +1,9 @@
 const randomize = require('randomatic');
+
 const {
+  checkAuthor,
   checkRole,
+  filterData,
   isArray,
 } = require('library/utils');
 const log = require('library/logger');
@@ -22,21 +25,7 @@ const findAll = async (req, res) => {
   log.verbose('Start finding all paths');
   try {
     const allPaths = await Path.findAll(req.query);
-    const filteredPaths = allPaths.filter((p) => {
-      console.log('### user', req.user);
-      console.log('### path', p);
-      if (checkRole(req.user, 'admin')) {
-        return true;
-      }
-      if (p.status === 'public') {
-        return true;
-      }
-      if (p.authors.some((a) => a._id.toString() === req.user._id.toString())) {
-        console.log('### is authors', p.authors);
-        return true;
-      }
-      return false;
-    });
+    const filteredPaths = filterData(req.user, allPaths);
     defaultResponse(req, res, 200, filteredPaths);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -48,7 +37,8 @@ const findSlug = async (req, res) => {
   try {
     log.verbose(`Start finding path with ${req.params.slug}`);
     const found = await Path.findSlug(req.params.slug);
-    if (found) defaultResponse(req, res, 200, [found]);
+    const filtered = filterData(req.user, [found]);
+    if (found) defaultResponse(req, res, 200, filtered);
     else defaultResponse(req, res, 404, 'Not Found');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -113,9 +103,10 @@ const createPath = async (req, res) => {
     if (checkRole(user, 'teacher')) {
       body.slug = `${slugify(body.name)}-${randomize('a0', 5)}`;
       body.authors = [user._id];
-      const createdSprint = await Path.createNew(body);
+      body.meta.version = 1;
+      const created = await Path.createNew(body);
       log.debug('New path was created');
-      defaultResponse(req, res, 201, createdSprint);
+      defaultResponse(req, res, 201, created);
     } else {
       defaultResponse(req, res, 403);
     }
@@ -145,7 +136,7 @@ const updatePath = async (req, res) => {
 const addSprints = async (req, res) => {
   log.silly('Start adding sprints to path...');
   try {
-    if (checkRole(req.user, 'admin')) {
+    if (checkRole(req.user, 'teacher')) {
       const updated = await Path.addSprints(req.params.id, req.body);
       log.debug('Path was updated');
       defaultResponse(req, res, 200, updated);
@@ -161,7 +152,7 @@ const addSprints = async (req, res) => {
 const removeSprints = async (req, res) => {
   log.silly('Start removing sprints from path...');
   try {
-    if (checkRole(req.user, 'admin')) {
+    if (checkRole(req.user, 'teacher')) {
       const updated = await Path.removeSprints(req.params.id, req.body);
       log.debug('Path was updated');
       defaultResponse(req, res, 200, updated);
@@ -174,14 +165,22 @@ const removeSprints = async (req, res) => {
   }
 };
 
-const removePath = async (req, res) => {
+const deletePath = async (req, res) => {
   try {
-    if (checkRole(req.user, 'admin')) {
-      const deleted = await Path.removeById(req.params.id);
-      log.debug('Path was deleted');
-      defaultResponse(req, res, 200, deleted);
+    const { user } = req;
+    const found = await Path.findById(req.params.id);
+
+    if (found) {
+      // only allow admin or author delete the path
+      if (checkRole(user, 'admin') || checkAuthor(user, found)) {
+        const deleted = await Path.deleteById(req.params.id);
+        log.debug('Path was deleted');
+        defaultResponse(req, res, 200, deleted);
+      } else {
+        defaultResponse(req, res, 403);
+      }
     } else {
-      defaultResponse(req, res, 403);
+      defaultResponse(req, res, 404);
     }
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -197,7 +196,7 @@ module.exports = {
   unenroll,
   createPath,
   updatePath,
-  removePath,
+  deletePath,
   addSprints,
   removeSprints,
 };

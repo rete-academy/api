@@ -7,7 +7,7 @@ const {
   unenroll,
   createPath,
   updatePath,
-  removePath,
+  deletePath,
   addSprints,
   removeSprints,
 } = require('controllers/paths');
@@ -25,7 +25,7 @@ module.exports = function (passport) {
   router.get('/:id', auth, invalidRequest);
   router.post('/:id', auth, invalidRequest);
   router.put('/:id', auth, updatePath);
-  router.delete('/:id', auth, removePath);
+  router.delete('/:id', auth, deletePath);
 
   router.put('/:id/add-sprints', auth, addSprints);
   router.put('/:id/remove-sprints', auth, removeSprints);

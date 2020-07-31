@@ -93,13 +93,21 @@ function slugify(value) {
   return str;
 }
 
-const isAdmin = (auth) => !!auth && auth.role && auth.role.includes(0);
-
 function filterUserData(auth, results) {
   if (auth.email) { // only allow registered user
     return results.filter((o) => Math.min(...o.role) >= Math.min(...auth.role));
   }
   return 'Not allowed';
+}
+
+function checkAuthor(user, data) {
+  if (!user) {
+    return false;
+  }
+  if (!data.authors || data.authors.length === 0) {
+    return true;
+  }
+  return data.authors.some((a) => a._id.toString() === user._id.toString());
 }
 
 function checkRole(user, role) {
@@ -127,17 +135,33 @@ function checkRole(user, role) {
   return false;
 }
 
+function filterData(user, data) {
+  return data.filter((o) => {
+    if (checkRole(user, 'admin')) {
+      return true;
+    }
+    if (o.status === 'public') {
+      return true;
+    }
+    if (o.authors.some((a) => a._id.toString() === user._id.toString())) {
+      return true;
+    }
+    return false;
+  });
+}
+
 module.exports = {
   authoriseUser,
+  checkAuthor,
   checkRole,
   promiseRejectWithError,
   defaultResponse,
+  filterData,
   filterUserData,
   getDomainFromUrl,
   notifyAdmin,
   slugify,
   strengthCheck,
-  isAdmin,
   isArray,
   isEmail,
   isObject,

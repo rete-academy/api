@@ -1,5 +1,3 @@
-'use strict';
-
 const log = require('library/logger');
 const {
   authoriseGoogle,
@@ -10,11 +8,11 @@ const {
   defaultResponse,
 } = require('library/utils');
 
-module.exports.invalidRequest = function(req, res) {
+module.exports.invalidRequest = function (req, res) {
   defaultResponse(req, res, 405);
 };
 
-module.exports.getConnectionUrl = function(req, res) {
+module.exports.getConnectionUrl = function (req, res) {
   try {
     log.silly('Start getting connection url for Google Oauth2...');
     const connectionURL = getConnectionUrl();
@@ -24,7 +22,7 @@ module.exports.getConnectionUrl = function(req, res) {
   }
 };
 
-module.exports.getAccessToken = async function(req, res) {
+module.exports.getAccessToken = async function (req, res) {
   try {
     log.silly('Start getting Google Oauth2 access token...');
     const { tokens, profile } = await getAccessToken(req.body.code);
@@ -35,7 +33,7 @@ module.exports.getAccessToken = async function(req, res) {
   }
 };
 
-module.exports.test = async function(req, res) {
+module.exports.test = async function (req, res) {
   try {
     const authed = await authoriseGoogle(req.session);
     log.silly(authed);

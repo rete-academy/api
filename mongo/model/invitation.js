@@ -1,69 +1,52 @@
-'use strict';
-
 const config = require('config');
 
-let options = {
+const options = {
   toObject: {
-    transform: function (doc, ret) {
+    transform(doc, ret) {
       delete ret._id;
       delete ret.__v;
       if (ret.created_time) ret.created_time = ret.created_time.getTime();
       if (ret.updated_time) ret.updated_time = ret.updated_time.getTime();
       return ret;
-    }
+    },
   },
   toJSON: {
-    transform: function (doc, ret) {
+    transform(doc, ret) {
       delete ret._id;
       delete ret.__v;
       if (ret.created_time) ret.created_time = ret.created_time.getTime();
       if (ret.updated_time) ret.updated_time = ret.updated_time.getTime();
       return ret;
-    }
+    },
   },
-  minimize: false
+  minimize: false,
 };
 
-let mongoose = require('mongoose'),
-  modelName = 'invitation',
-  schemaDefinition = require('../schema/' + modelName),
-  schemaInstance = mongoose.Schema(schemaDefinition, options);
+const mongoose = require('mongoose');
+
+const modelName = 'invitation';
+const schemaDefinition = require(`../schema/${modelName}`);
+const schemaInstance = mongoose.Schema(schemaDefinition, options);
 
 schemaInstance.index({ code: 1 });
 
-let modelInstance = mongoose.model(modelName, schemaInstance),
-  Invitation = module.exports = modelInstance;
+const modelInstance = mongoose.model(modelName, schemaInstance);
+const Invitation = module.exports = modelInstance;
 
 module.exports.findAll = function (query) {
-  return Invitation.find(query).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
+  return Invitation.find(query).then((result) => Promise.resolve(result)).catch((error) => Promise.reject(error.message));
 };
 
 module.exports.findById = function (id) {
-  return Invitation.findOne({invitation_id: id}).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
+  return Invitation.findOne({ invitation_id: id }).then((result) => Promise.resolve(result)).catch((error) => Promise.reject(error.message));
 };
 
 module.exports.findByCreator = function (id) {
-  return Invitation.find({created_by: id}).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
+  return Invitation.find({ created_by: id }).then((result) => Promise.resolve(result)).catch((error) => Promise.reject(error.message));
 };
 
 module.exports.findByCode = function (code) {
-  return Invitation.findOne({code: code}).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) { 
-    return Promise.reject(error.message);
-  });
+  return Invitation.findOne({ code }).then((result) => Promise.resolve(result)).catch((error) => Promise.reject(error.message));
 };
 
 module.exports.createNew = function (doc) {
@@ -73,44 +56,33 @@ module.exports.createNew = function (doc) {
   invitation.invitation_id = new mongoose.mongo.ObjectID();
 
   invitation = JSON.parse(JSON.stringify(invitation));
-  return Invitation.create(invitation).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
+  return Invitation.create(invitation).then((result) => Promise.resolve(result)).catch((error) => Promise.reject(error.message));
 };
 
 module.exports.findAndUpdateStatus = function (id, new_status) {
   return Invitation.findOneAndUpdate(
-    { 'invitation_id': id },
-    { $set: {"status": new_status}},
-    { new: true},
+    { invitation_id: id },
+    { $set: { status: new_status } },
+    { new: true },
   )
-    .then(result => {
+    .then((result) => {
       if (result === null) {
         return Promise.reject(error.message);
-      } else {
-        return Invitation.findOneAndUpdate(
-          { "invitation_id": id },
-          { $set: {"updated_time": Date.now() } },
-          { new: true },
-        )
-          .then(result => {
-            return Promise.resolve();
-          });
       }
-    }).catch(error => {
-      return Promise.reject(error.message);
-    });
+      return Invitation.findOneAndUpdate(
+        { invitation_id: id },
+        { $set: { updated_time: Date.now() } },
+        { new: true },
+      )
+        .then((result) => Promise.resolve());
+    }).catch((error) => Promise.reject(error.message));
 };
 
 module.exports.removeById = function (id) {
-  return Invitation.findOneAndRemove({invitation_id: id}).then(function (result) {
+  return Invitation.findOneAndRemove({ invitation_id: id }).then((result) => {
     if (result === null) return Promise.reject('Not found');
     return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
+  }).catch((error) => Promise.reject(error.message));
 };
 
 module.exports.isExpired = function (invitation) {

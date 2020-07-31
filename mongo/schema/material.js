@@ -1,5 +1,3 @@
-'use strict';
-
 const mongoose = require('mongoose');
 
 module.exports = {
@@ -35,6 +33,7 @@ module.exports = {
   meta: {
     type: mongoose.Schema.Types.Mixed,
     default: {
+      position: {},
       version: 1,
     },
   },
@@ -47,4 +46,3 @@ module.exports = {
     default: Date.now,
   },
 };
-

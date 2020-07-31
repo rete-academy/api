@@ -80,6 +80,8 @@ modelInstance.updateById = async function (id, doc) {
     const data = { ...doc };
     delete data._id;
     data.updatedTime = Date.now();
+    data.meta.version += 1;
+
     return await modelInstance.findOneAndUpdate(
       { _id: id },
       data,
@@ -133,7 +135,7 @@ modelInstance.removeSprints = async function (id, doc) {
   }
 };
 
-modelInstance.removeById = async function (id) {
+modelInstance.deleteById = async function (id) {
   try {
     log.silly(`Remove a path with id ${id}`);
     return await modelInstance.findOneAndDelete({ _id: id });
