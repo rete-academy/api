@@ -29,7 +29,7 @@ const resolvers = {
 
 const server = new ApolloServer({ typeDefs, resolvers });
 server.applyMiddleware({ app });
-const io = require('socket.io')(server);
+// const io = require('socket.io')(server);
 
 sentry.init({ dsn: 'https://7a23e0719d964b6ea1252e9912d5e0f0@sentry.io/1401406' });
 
@@ -59,7 +59,13 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(passport.initialize());
 app.use((req, res, next) => {
-  req.io = io; // add io into req so controllers can use it
+  // req.io = io; // add io into req so controllers can use it
+
+  res.header('Access-Control-Allow-Origin', '*'); // Learn about this later
+  // res.header('Access-Control-Allow-Credentials', true);
+  // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
   next();
 });
 
