@@ -3,6 +3,10 @@
   "version": "1.2.0-alpha",
   "description": "Rete Academy API in Node, Express",
   "main": "index.js",
+  "engine": {
+    "node": "10.15.x",
+    "npm": "6.x.x"
+  },
   "scripts": {
     "lint": "eslint --fix --ext .js --ignore-path .gitignore .",
     "dev": "nodemon index.js",
