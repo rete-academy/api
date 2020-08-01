@@ -43,8 +43,7 @@ app.use(helmet);
 
 // app.use(cors({ origin: config.default.webUrl }));
 app.use(cors({
-  origin: '*',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  origin: process.env.WEB_URL,
 }));
 
 const sessOptions = {
