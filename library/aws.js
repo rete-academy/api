@@ -11,46 +11,47 @@ const s3 = new aws.S3({
 });
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination(req, file, cb) {
     log.debug(file);
-    cb(null, 'uploads')
+    cb(null, 'uploads');
   },
-  filename: function (req, file, cb) {
+  filename(req, file, cb) {
     log.debug(file);
-    cb(null, file.fieldname + '-' + Date.now())
-  }
-})
+    cb(null, `${file.fieldname}-${Date.now()}`);
+  },
+});
 
-const normalUpload = multer({ storage: storage })
+const normalUpload = multer({ storage });
 
 const uploadToS3 = multer({
   storage: multerS3({
-    s3: s3,
+    s3,
     bucket: process.env.AWS_S3_BUCKET,
     acl: 'public-read',
     cacheControl: `max-age=${config.limit.fileCache}`,
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
+    metadata(req, file, callback) {
+      callback(null, {
+        fieldname: file.fieldname,
+        user: req.user._id.toString(),
+      });
     },
-    key: function (req, file, cb) {
-      cb(null,`${req.user._id}/${file.fieldname}/${file.originalname}`);
+    key(req, file, callback) {
+      callback(null, `${file.fieldname}/${file.originalname}`);
     },
   }),
 });
 
-const deleteFromS3 = (params) => {
-  return new Promise((resolve, reject) => {
-    s3.deleteObjects(params, (err, data) => {
-      if (err) {
-        log.error(err.stack);
-        reject(err.stack);
-      } else {
-        log.debug(data);
-        resolve(data);
-      }
-    });
+const deleteFromS3 = (params) => new Promise((resolve, reject) => {
+  s3.deleteObjects(params, (err, data) => {
+    if (err) {
+      log.error(err.stack);
+      reject(err.stack);
+    } else {
+      log.debug(data);
+      resolve(data);
+    }
   });
-};
+});
 
 module.exports = {
   uploadToS3,
