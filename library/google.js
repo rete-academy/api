@@ -26,54 +26,38 @@ const oauth2Client = new google.auth.OAuth2(
  * Get a url which will open the google sign-in page and
  * request access to the scope provided
  */
-const getConnectionUrl = (scopes = []) => {
-  try {
-    return oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      prompt: 'consent', // force new refresh token
-      scope: defaultScopes.concat(scopes).join(' '),
-    });
-  } catch (err) {
-    throw err;
-  }
-};
+const getConnectionUrl = (scopes = []) => oauth2Client.generateAuthUrl({
+  access_type: 'offline',
+  prompt: 'consent', // force new refresh token
+  scope: defaultScopes.concat(scopes).join(' '),
+});
 
 /**
  * Get and store new token after prompting for user authorization
  */
 const getAccessToken = async (code) => {
-  try {
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
 
-    // Get user profile
-    const oauth2 = google.oauth2({
-      auth: oauth2Client,
-      version: 'v2'
-    });
-    const { data } = await oauth2.userinfo.get();
-    // Merge tokens and user profile then return
-    return { tokens, profile: data };
-  } catch (err) {
-    throw err;
-  }
+  // Get user profile
+  const oauth2 = google.oauth2({
+    auth: oauth2Client,
+    version: 'v2',
+  });
+  const { data } = await oauth2.userinfo.get();
+  // Merge tokens and user profile then return
+  return { tokens, profile: data };
 };
 
 const authoriseGoogle = async (session) => {
-  // console.log({ tokens: session.tokens });
-  try {
-    if (session && session.tokens) {
-      const tokens = session.tokens;
-      // Check the token valid or not
-      oauth2Client.setCredentials(tokens);
-      const authed = await oauth2Client.getTokenInfo(tokens.access_token);
-      // console.log({ authed });
-      return authed;
-    }
-    return null;
-  } catch (err) {
-    throw err;
+  if (session && session.tokens) {
+    const { tokens } = session;
+    // Check the token valid or not
+    oauth2Client.setCredentials(tokens);
+    const authed = await oauth2Client.getTokenInfo(tokens.access_token);
+    return authed;
   }
+  return null;
 };
 
 module.exports = {

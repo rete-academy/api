@@ -10,12 +10,12 @@ const Client = require('mongo/model/client');
 const Invitation = require('mongo/model/invitation');
 const AccessToken = require('mongo/model/token');
 const PasswordResetToken = require('mongo/model/password');
-const Confirmation = require('mongo/model/confirmation_code');
+// const Confirmation = require('mongo/model/confirmation_code');
 
 const {
   InvitationStrategy,
   PasswordResetStrategy,
-  EmailConfirmationStrategy,
+  // EmailConfirmationStrategy,
 } = require('library/strategy');
 
 module.exports = function (passport) {
@@ -79,7 +79,7 @@ module.exports = function (passport) {
         if (!token) done(null, false);
 
         if (Math.round((Date.now() - token.created_time) / 1000) > 2592000) {
-          AccessToken.deleteOne({ token }, (err) => done(err));
+          AccessToken.removeByToken({ token: tokenStr }, (err) => done(err));
           done(null, false, { message: 'Token expired' });
         }
 
@@ -113,14 +113,14 @@ module.exports = function (passport) {
     },
   ));
 
-  passport.use('confirmation', new EmailConfirmationStrategy(
+  /* passport.use('confirmation', new EmailConfirmationStrategy(
     (code, done) => {
       Confirmation.findByCode({ code }).then((foundCode) => {
         if (!foundCode) return done(null, false);
         return done(null, code);
       }).catch((err) => done(err));
     },
-  ));
+  )); */
 
   passport.use('facebook', new FacebookStrategy(
     {

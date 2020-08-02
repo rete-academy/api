@@ -41,10 +41,7 @@ require('mongo/db');
 
 app.use(helmet);
 
-// app.use(cors({ origin: config.default.webUrl }));
-app.use(cors({
-  origin: process.env.WEB_URL,
-}));
+app.use(cors());
 
 const sessOptions = {
   secret: 'sessionSecret123',

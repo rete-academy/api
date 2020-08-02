@@ -21,7 +21,10 @@ function InvitationStrategy(options, verify) {
     verify = options;
     options = {};
   }
-  if (!verify) throw new Error('Invitation authentication strategy requires a verify function');
+
+  if (!verify) {
+    throw new Error('Invitation authentication strategy requires a verify function');
+  }
 
   this._invitationCodeField = options.invitationCodeField || 'code';
 
@@ -31,11 +34,11 @@ function InvitationStrategy(options, verify) {
   this._passReqToCallback = options.passReqToCallback;
 }
 
-function EmailConfirmationStrategy() {}
+// function EmailConfirmationStrategy() {}
 
 util.inherits(InvitationStrategy, Strategy);
 util.inherits(PasswordResetStrategy, Strategy);
-util.inherits(EmailConfirmationStrategy, Strategy);
+// util.inherits(EmailConfirmationStrategy, Strategy);
 
 /**
  * Authenticate request based on the contents of a form submission.
@@ -44,9 +47,26 @@ util.inherits(EmailConfirmationStrategy, Strategy);
  * @api protected
  */
 PasswordResetStrategy.prototype.authenticate = function (req) {
+  function lookup(obj, field) {
+    if (!obj) { return null; }
+
+    const chain = field.split(']').join('').split('[');
+
+    for (let i = 0, len = chain.length; i < len; i++) {
+      const prop = obj[chain[i]];
+      if (typeof (prop) === 'undefined') { return null; }
+      if (typeof (prop) !== 'object') {
+        return prop;
+      }
+      obj = prop;
+    }
+    return null;
+  }
+
   // const options = opt || {};
   // Looking for this._tokenField inside both request queries and request bodies
-  const resetToken = lookup(req.body, this._tokenField) || lookup(req.query, this._tokenField);
+  const { body, query } = req;
+  const resetToken = lookup(body, this._tokenField) || lookup(query, this._tokenField);
   if (!resetToken) {
     return this.fail(new Error('Missing password reset token'));
   }
@@ -54,17 +74,27 @@ PasswordResetStrategy.prototype.authenticate = function (req) {
   const self = this;
 
   function verified(err, user, info) {
-    if (err) { return self.error(err); }
-    if (!user) { return self.fail(info); }
-    self.success(user, info);
+    if (err) {
+      return self.error(err);
+    }
+    if (!user) {
+      return self.fail(info);
+    }
+    return self.success(user, info);
   }
 
   if (self._passReqToCallback) {
-    this._verify(req, resetToken, verified);
-  } else {
-    this._verify(resetToken, verified);
+    return this._verify(req, resetToken, verified);
   }
-
+  return this._verify(resetToken, verified);
+};
+/**
+ * Authenticate request based on the contents of a form submission.
+ *
+ * @param {Object} req
+ * @api protected
+ */
+InvitationStrategy.prototype.authenticate = function (req) {
   function lookup(obj, field) {
     if (!obj) { return null; }
     const chain = field.split(']').join('').split('[');
@@ -78,16 +108,7 @@ PasswordResetStrategy.prototype.authenticate = function (req) {
     }
     return null;
   }
-};
-/**
- * Authenticate request based on the contents of a form submission.
- *
- * @param {Object} req
- * @api protected
- */
-InvitationStrategy.prototype.authenticate = function (req) {
-  // options = options || {};
-  // Looking for this._invitationCodeField inside both request queries and request bodies
+
   const invitationCode = lookup(req.body, this._invitationCodeField) || lookup(req.query, this._invitationCodeField);
   if (!invitationCode) {
     return this.fail(new Error('Missing invitation code'));
@@ -98,35 +119,20 @@ InvitationStrategy.prototype.authenticate = function (req) {
   function verified(err, user, info) {
     if (err) { return self.error(err); }
     if (!user) { return self.fail(info); }
-    self.success(user, info);
+    return self.success(user, info);
   }
 
   if (self._passReqToCallback) {
-    this._verify(req, invitationCode, verified);
-  } else {
-    this._verify(invitationCode, verified);
+    return this._verify(req, invitationCode, verified);
   }
-
-  function lookup(obj, field) {
-    if (!obj) { return null; }
-    const chain = field.split(']').join('').split('[');
-    for (let i = 0, len = chain.length; i < len; i++) {
-      const prop = obj[chain[i]];
-      if (typeof (prop) === 'undefined') { return null; }
-      if (typeof (prop) !== 'object') {
-        return prop;
-      }
-      obj = prop;
-    }
-    return null;
-  }
+  return this._verify(invitationCode, verified);
 };
 
-EmailConfirmationStrategy.prototype.authenticate = function () {};
+// EmailConfirmationStrategy.prototype.authenticate = function () {};
 
 // Expose Strategy constructor
 module.exports = {
   InvitationStrategy,
   PasswordResetStrategy,
-  EmailConfirmationStrategy,
+  // EmailConfirmationStrategy,
 };

@@ -45,11 +45,9 @@ const updateMaterial = async function (req, res) {
   log.silly('Start updating a material...');
   try {
     const { body, params, user } = req;
-    console.log('### body:', body);
 
     if (checkRole(user, 'teacher')) {
       const updated = await Material.updateById(params.id, body);
-      console.log('### updated:', updated);
       log.debug('Material was updated');
       defaultResponse(req, res, 200, updated);
     } else {

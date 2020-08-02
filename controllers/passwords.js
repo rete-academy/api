@@ -24,7 +24,9 @@ module.exports.forgot = async (req, res) => {
     const foundUser = await User.findOne({ email });
 
     if (!foundUser) {
-      promiseRejectWithError(404, 'User not found.');
+      defaultResponse(req, res, 200, 'OK'); // silently OK
+      return;
+      // promiseRejectWithError(404, 'User not found.');
     }
 
     await Password.deleteOne({ _id: foundUser._id });

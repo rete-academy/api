@@ -4,9 +4,7 @@ const {
   getConnectionUrl,
   getAccessToken,
 } = require('library/google');
-const {
-  defaultResponse,
-} = require('library/utils');
+const { defaultResponse } = require('library/utils');
 
 module.exports.invalidRequest = function (req, res) {
   defaultResponse(req, res, 405);
@@ -36,7 +34,6 @@ module.exports.getAccessToken = async function (req, res) {
 module.exports.test = async function (req, res) {
   try {
     const authed = await authoriseGoogle(req.session);
-    log.silly(authed);
 
     if (authed) {
       defaultResponse(req, res, 200, authed);

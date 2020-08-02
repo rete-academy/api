@@ -109,7 +109,6 @@ modelInstance.updateById = (id, doc) => {
   delete user.salt;
   delete user.__v;
   delete user._id;
-  console.log('### user:', user);
 
   // TODO: check password before save
   // result.hashedPassword = result.encryptPassword(user.password);

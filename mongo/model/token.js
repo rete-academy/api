@@ -1,58 +1,40 @@
-'use strict';
-
-const path = require('path');
 const mongoose = require('mongoose');
-const modelName = path.basename(__filename).slice(0, -3);
+const schemaDefinition = require('../schema/token');
 
-let options = {
-  toObject: {
-    transform: function (doc, ret) {
-      delete ret._id;
-      delete ret.__v;
-      if (ret.created_time) ret.created_time = ret.created_time.getTime();
-      return ret;
-    }
-  },
-  toJSON: {
-    transform: function (doc, ret) {
-      delete ret._id;
-      delete ret.__v;
-      if (ret.created_time) ret.created_time = ret.created_time.getTime();
-      return ret;
-    }
-  },
-  minimize: false
+const transform = function (doc, ret) {
+  delete ret.__v;
+  return ret;
 };
 
-let schemaDefinition = require('../schema/' + modelName),
-  schemaInstance = mongoose.Schema(schemaDefinition, options);
+const schemaInstance = mongoose.Schema(schemaDefinition, {
+  toObject: { transform },
+  toJSON: { transform },
+  minimize: false,
+});
 
-schemaInstance.index({ 'expires': 1 }, { expireAfterSeconds: 0 });
+schemaInstance.index({ expires: 1 }, { expireAfterSeconds: 0 });
 
-let modelInstance = mongoose.model(modelName, schemaInstance),
-  AccessToken = module.exports = modelInstance;
+const modelInstance = mongoose.model('token', schemaInstance);
 
-module.exports.findAll = function (query) {
-  return AccessToken.find(query).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
+modelInstance.findAll = function (query) {
+  return modelInstance
+    .find(query)
+    .then((result) => Promise.resolve(result))
+    .catch((error) => Promise.reject(error.message));
 };
 
-module.exports.findByToken = function (token) {
-  return AccessToken.findOne({token: token}).then(function (result) {
-    return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
+modelInstance.findByToken = function (token) {
+  return modelInstance
+    .findOne({ token })
+    .then((result) => Promise.resolve(result))
+    .catch((error) => Promise.reject(error.message));
 };
 
-module.exports.removeByToken = function (token) {
-  return AccessToken.findOneAndRemove({token: token}).then(function (result) {
-    if (result === null) return Promise.reject('Not found');
-    return Promise.resolve(result);
-  }).catch(function(error) {
-    return Promise.reject(error.message);
-  });
+modelInstance.removeByToken = function (token) {
+  return modelInstance
+    .findOneAndRemove({ token })
+    .then((result) => Promise.resolve(result))
+    .catch((error) => Promise.reject(error.message));
 };
+
+module.exports = modelInstance;
