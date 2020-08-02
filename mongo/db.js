@@ -7,23 +7,18 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
-function handleConnect() {
-  mongoose.connect(
-    process.env.MONGO_URL,
-    {
-      user: process.env.MONGO_USER,
-      pass: process.env.MONGO_PASS,
-      useNewUrlParser: true,
-    },
-  );
+mongoose.connect(
+  process.env.MONGO_URL,
+  {
+    user: process.env.MONGO_USER,
+    pass: process.env.MONGO_PASS,
+    useNewUrlParser: true,
+  },
+);
 
-  mongoose.connection.once('open', () => {
-    log.verbose('We are connected to database.');
-  });
-}
-
-// Establish database connection
-handleConnect();
+mongoose.connection.once('open', () => {
+  log.verbose('We are connected to database.');
+});
 
 // Listen for Mongoose connection events and output statuses to console
 mongoose.connection.on('connected', async () => {
@@ -32,11 +27,9 @@ mongoose.connection.on('connected', async () => {
   createAdmin();
 });
 
-mongoose.connection.on('error', (err) => {
-  log.error(err);
-  log.verbose('Trying to reconnect...');
-
-  handleConnect();
+mongoose.connection.on('error', (error) => {
+  log.error(error);
+  log.verbose('MongoDB connection has problem...');
 });
 
 mongoose.connection.on('disconnected', () => {

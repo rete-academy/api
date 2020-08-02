@@ -10,6 +10,9 @@ const log = require('library/logger');
 const passport = require('passport');
 const sentry = require('@sentry/node');
 const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
+const mongoose = require('mongo/db');
+
 // const server = require('http').createServer(app);
 // ha ha ha it works
 const { ApolloServer, gql } = require('apollo-server-express');
@@ -28,7 +31,6 @@ const resolvers = {
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
-server.applyMiddleware({ app });
 const io = require('socket.io')(server);
 
 sentry.init({ dsn: 'https://7a23e0719d964b6ea1252e9912d5e0f0@sentry.io/1401406' });
@@ -37,18 +39,21 @@ app.use(sentry.Handlers.requestHandler());
 app.use(sentry.Handlers.errorHandler());
 
 require('library/passport')(passport);
-require('mongo/db');
 
 app.use(helmet);
 
 app.use(cors());
 
 const sessOptions = {
-  secret: 'sessionSecret123',
+  cookie: { secure: true },
   resave: false,
   saveUninitialized: true,
-  cookie: {},
+  secret: process.env.SESSION_SECRET,
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection,
+  }),
 };
+
 if (app.get('env') === 'production') {
   app.set('trust proxy', 1); // trust first proxy
   sessOptions.cookie.secure = true; // serve secure cookies
