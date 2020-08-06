@@ -78,7 +78,7 @@ module.exports = function (passport) {
       AccessToken.findOne({ token: tokenStr }).then((token) => {
         if (!token) done(null, false);
 
-        if (Math.round((Date.now() - token.created_time) / 1000) > 2592000) {
+        if (token && Math.round((Date.now() - token.created_time) / 1000) > 2592000) {
           AccessToken.removeByToken({ token: tokenStr }, (err) => done(err));
           done(null, false, { message: 'Token expired' });
         }
@@ -130,7 +130,7 @@ module.exports = function (passport) {
       profileFields: ['id', 'displayName', 'photos', 'email'],
     },
     (accessToken, refreshToken, profile, done) => {
-      log.debug(`login from FB ${accessToken}`);
+      log.debug('Login from Facebook...');
 
       User.findOne({ 'provider.facebook.id': profile.id })
         .then(async (err, user) => {
@@ -140,7 +140,8 @@ module.exports = function (passport) {
           }
 
           if (!user) {
-            log.debug('Can not find this facebook user');
+            log.debug('User not found, start creating new one...');
+
             const newUser = await User.createNew({
               fullName: profile.displayName,
               email: profile.emails[0].value,
@@ -151,6 +152,7 @@ module.exports = function (passport) {
             });
             return done(err, newUser);
           }
+
           log.debug('Found facebook user');
           return done(err, user);
         });

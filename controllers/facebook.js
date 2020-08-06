@@ -1,15 +1,30 @@
-'use strict';
-
 const log = require('library/logger');
 const {
   defaultResponse,
 } = require('library/utils');
 
-module.exports.test = function(req, res) {
-  log.warn('just a test');    
-  defaultResponse(req, res, 200, 'It is tested');
+const initialize = async (req, res) => {
+  log.silly('Start handling the login...');
+
+  try {
+    // const { body, user } = req;
+    defaultResponse(req, res, 201, { message: 'Login successfully' });
+  } catch (error) {
+    log.error(`${error.name}: ${error.message}`);
+    defaultResponse(req, res, error.httpStatusCode, error.message);
+  }
 };
 
-module.exports.callback = function(req, res) {
-  defaultResponse(req, res, 200, 'I can do it mother fucker');
+const check = (req, res) => {
+  defaultResponse(req, res, 200, { message: 'Login ok' });
+};
+
+const handleFail = (req, res) => {
+  defaultResponse(req, res, 403, { message: 'Failed login by Facebook' });
+};
+
+module.exports = {
+  initialize,
+  check,
+  handleFail,
 };
