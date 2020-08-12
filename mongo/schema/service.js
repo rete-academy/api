@@ -1,5 +1,3 @@
-'use strict';
-
 const mongoose = require('mongoose');
 
 module.exports = {
@@ -16,11 +14,10 @@ module.exports = {
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'calendar',
-    }
+    },
   ],
   bookingCalendar: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'calendar',
   },
 };
-

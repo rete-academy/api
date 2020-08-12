@@ -1,19 +1,18 @@
-"use strict";
 module.exports = {
   code: {
     type: String,
-    required: true
+    required: true,
   },
   redirect_uri: {
     type: String,
-    required: true
+    required: true,
   },
   user_id: {
     type: String,
-    required: true
+    required: true,
   },
   client_id: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 };

@@ -1,5 +1,3 @@
-'use strict';
-
 const router = require('express').Router();
 const {
   invalidRequest,
@@ -12,8 +10,8 @@ const {
 } = require('controllers/sprints');
 
 module.exports = function (passport) {
-  let authClient = passport.authenticate(['bearer', 'client-basic'], { session: false });
-  let auth = passport.authenticate(['bearer'], { session: false });
+  const authClient = passport.authenticate(['bearer', 'client-basic'], { session: false });
+  const auth = passport.authenticate(['bearer'], { session: false });
 
   router.get('', authClient, findAll);
   router.post('', auth, createSprint);

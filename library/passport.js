@@ -1,4 +1,5 @@
 // const conf = require('config');
+const randomize = require('randomatic');
 const { BasicStrategy } = require('passport-http');
 const ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
@@ -17,6 +18,13 @@ const {
   PasswordResetStrategy,
   // EmailConfirmationStrategy,
 } = require('library/strategy');
+
+const {
+  // checkRole,
+  // defaultResponse,
+  // filterUserData,
+  slugify,
+} = require('library/utils');
 
 module.exports = function (passport) {
   passport.serializeUser((user, done) => {
@@ -130,7 +138,13 @@ module.exports = function (passport) {
       profileFields: ['id', 'displayName', 'photos', 'email'],
     },
     (accessToken, refreshToken, profile, done) => {
+      console.log('### profile:', profile);
       log.debug('Login from Facebook...');
+
+      const {
+        displayName,
+        username,
+      } = profile;
 
       User.findOne({ 'provider.facebook.id': profile.id })
         .then(async (err, user) => {
@@ -143,9 +157,9 @@ module.exports = function (passport) {
             log.debug('User not found, start creating new one...');
 
             const newUser = await User.createNew({
-              fullName: profile.displayName,
+              fullName: displayName,
               email: profile.emails[0].value,
-              username: profile.username,
+              username: username || `${slugify(displayName)}${randomize('a0', 6)}`,
               provider: {
                 facebook: profile._json,
               },

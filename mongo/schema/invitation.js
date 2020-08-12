@@ -1,4 +1,3 @@
-"use strict";
 const validate = require('mongoose-validator');
 
 const emailValidator = validate({
@@ -68,5 +67,5 @@ module.exports = {
     },
     min: 0,
     max: 0,
-  }
+  },
 };

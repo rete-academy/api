@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
-const nodemailer = require('nodemailer')
-const mg = require('nodemailer-mailgun-transport')
+const nodemailer = require('nodemailer');
+const mg = require('nodemailer-mailgun-transport');
 // const config = require('config');
 const log = require('library/logger');
 
@@ -22,31 +22,35 @@ class EmailService {
     this.emailClient = nodemailer.createTransport(mg(mailgunOptions));
   }
 
-  sendMail({ from, to, subject, text, placeholders, type }) {
-    log.silly('Start sending email to: ' + to);
+  sendMail({
+    from, to, subject, text, placeholders, type,
+  }) {
+    log.silly(`Start sending email to: ${to}`);
     return new Promise(async (resolve, reject) => {
       let html = '';
 
-      switch(type) {
-      case 'admin': 
-        html = await fs.readFile(adminTemplate); break;
-      case 'general': 
-        html = await fs.readFile(generalTemplate); break;
-      case 'welcome': 
-        html = await fs.readFile(welcomeTemplate); break;
-      case 'reset': 
-        html = await fs.readFile(resetTemplate); break;
-      default: 
-        html = await fs.readFile(generalTemplate); break;
+      switch (type) {
+        case 'admin':
+          html = await fs.readFile(adminTemplate); break;
+        case 'general':
+          html = await fs.readFile(generalTemplate); break;
+        case 'welcome':
+          html = await fs.readFile(welcomeTemplate); break;
+        case 'reset':
+          html = await fs.readFile(resetTemplate); break;
+        default:
+          html = await fs.readFile(generalTemplate); break;
       }
 
-      for (let key in placeholders) {
+      for (const key in placeholders) {
         if (placeholders.hasOwnProperty(key)) {
           html = html.toString().replace(key, placeholders[key]);
         }
       }
 
-      const mailOptions = { from, to, subject, text, html };
+      const mailOptions = {
+        from, to, subject, text, html,
+      };
 
       this.emailClient.sendMail(mailOptions, (error, info) => {
         if (error) {
@@ -64,4 +68,3 @@ class EmailService {
 }
 
 module.exports = new EmailService();
-

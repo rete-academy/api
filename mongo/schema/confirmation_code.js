@@ -1,23 +1,21 @@
-"use strict";
-
 module.exports = {
   createdTime: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   userId: {
     type: String,
-    required: true
+    required: true,
   },
   email: {
     type: String,
-    validate: function(email) {
-      return /^[a-zA-Z0-9.!#$%&’*+=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email)
+    validate(email) {
+      return /^[a-zA-Z0-9.!#$%&’*+=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email);
     },
-    required: true
+    required: true,
   },
   code: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 };

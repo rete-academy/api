@@ -1,5 +1,3 @@
-'use strict';
-
 /*
 const randomize = require('randomatic');
 const log = require('library/logger');
@@ -16,16 +14,15 @@ const {
   // slugify,
 } = require('library/utils');
 
-const invalidRequest = function(req, res) {
+const invalidRequest = function (req, res) {
   defaultResponse(req, res, 405);
 };
 
-const getSettings = function(req, res) {};
-const putSettings = function(req, res) {};
+const getSettings = function (req, res) {};
+const putSettings = function (req, res) {};
 
 module.exports = {
   invalidRequest,
   getSettings,
   putSettings,
 };
-

@@ -1,5 +1,3 @@
-'use strict';
-
 const {
   checkRole,
   // isArray,
@@ -12,49 +10,49 @@ const {
   defaultResponse,
 } = require('library/utils');
 
-const invalidRequest = function(req, res) {
+const invalidRequest = function (req, res) {
   defaultResponse(req, res, 405);
 };
 
-const findAll = async function(req, res) {
+const findAll = async function (req, res) {
   try {
     log.verbose('Start finding all conversations');
     const results = await Conversation.findAll(req.query);
     defaultResponse(req, res, 200, results);
-  } catch (error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const findById = async function(req, res) {
+const findById = async function (req, res) {
   try {
     log.verbose('Start finding a conversation');
     const result = await Conversation.findById(req.params.id);
     defaultResponse(req, res, 200, result);
-  } catch (error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const createNew = async function(req, res) {
+const createNew = async function (req, res) {
   try {
     log.verbose('Start finding all conversation');
     const result = await Conversation.create(req.body);
     await Material.findOneAndUpdate(
       { _id: req.body.material },
       { conversation: result._id },
-      { new: true }
+      { new: true },
     );
     defaultResponse(req, res, 201, result);
-  } catch (error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const addMessage = async function(req, res) {
+const addMessage = async function (req, res) {
   try {
     log.verbose('Start adding message into conversation...');
     if (req.body.content === '') {
@@ -65,13 +63,13 @@ const addMessage = async function(req, res) {
     const updated = await Conversation.addMessage(req.params.id, req.body);
     req.io.emit('CHAT_MESSAGE', updated);
     return defaultResponse(req, res, 201, updated);
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }
 };
 
-const remove = async function(req, res) {
+const remove = async function (req, res) {
   try {
     if (checkRole(req.user, 'admin')) {
       await Conversation.removeById(req.params.id);
@@ -80,7 +78,7 @@ const remove = async function(req, res) {
     } else {
       defaultResponse(req, res, 403);
     }
-  } catch(error) { 
+  } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
   }

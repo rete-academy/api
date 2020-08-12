@@ -1,5 +1,3 @@
-'use strict';
-
 // const validate = require('mongoose-validator');
 const mongoose = require('mongoose');
 
@@ -32,7 +30,7 @@ module.exports = {
     default: {
       version: 1,
       people: 0,
-      status: 1,// 1 active, 0 inactive, 9 archive
+      status: 1, // 1 active, 0 inactive, 9 archive
     },
   },
   createdTime: {

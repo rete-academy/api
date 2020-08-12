@@ -1,4 +1,3 @@
-'use strict';
 const validate = require('mongoose-validator');
 
 module.exports = {
@@ -8,15 +7,15 @@ module.exports = {
     default: 0,
     validate: validate({ validator: 'isInt' }),
     min: 0,
-    max: 0
+    max: 0,
   },
   image_id: {
     type: String,
-    required: true
+    required: true,
   },
   doc_id: {
     type: String,
-    required: true
+    required: true,
   },
   data: Buffer,
   width: Number,
@@ -24,7 +23,6 @@ module.exports = {
   contentType: String,
   created_time: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 };
-

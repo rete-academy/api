@@ -1,5 +1,3 @@
-'use strict';
-
 const router = require('express').Router();
 const {
   invalidRequest,
@@ -9,8 +7,8 @@ const {
 // const { uploadToS3 } = require('library/aws');
 // const { googleAuth } = require('library/google');
 
-module.exports = function(passport) {
-  let auth = passport.authenticate(['bearer'], { session: false });
+module.exports = function (passport) {
+  const auth = passport.authenticate(['bearer'], { session: false });
   // let authClient = passport.authenticate(['bearer', 'client-basic'], { session: false });
 
   router.get('', auth, getSettings);
