@@ -26,7 +26,8 @@ class EmailService {
     from, to, subject, text, placeholders, type,
   }) {
     log.silly(`Start sending email to: ${to}`);
-    return new Promise(async (resolve, reject) => {
+
+    return async () => {
       let html = '';
 
       switch (type) {
@@ -42,11 +43,13 @@ class EmailService {
           html = await fs.readFile(generalTemplate); break;
       }
 
-      for (const key in placeholders) {
-        if (placeholders.hasOwnProperty(key)) {
+      const keys = Object.keys(placeholders);
+
+      keys.forEach((key) => {
+        if (placeholders[key]) {
           html = html.toString().replace(key, placeholders[key]);
         }
-      }
+      });
 
       const mailOptions = {
         from, to, subject, text, html,
@@ -56,14 +59,14 @@ class EmailService {
         if (error) {
           log.error(error.message);
           log.silly(`Sent email to ${to} failed.`);
-          reject(error);
-        } else {
-          log.debug(info);
-          log.silly(`Sent email to ${to} successfully.`);
-          resolve(info);
+          return error;
         }
+
+        log.debug(info);
+        log.silly(`Sent email to ${to} successfully.`);
+        return info;
       });
-    });
+    };
   }
 }
 

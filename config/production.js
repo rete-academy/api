@@ -26,13 +26,13 @@ module.exports = {
     },
     welcome: {
       subject: 'Welcome to Rete Academy',
-      text: 'Welcome to Rete Academy',
-      content: 'Welcome to Rete Academy.',
+      text: '',
+      content: '',
     },
     reset: {
       subject: 'Reset your password',
-      text: 'Reset your password',
-      content: 'Reset your password',
+      text: '',
+      content: '',
     },
   },
 

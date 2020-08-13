@@ -20,11 +20,11 @@ const { uploadToS3 } = require('library/aws');
 
 module.exports = function (passport) {
   const auth = passport.authenticate(['bearer'], { session: false });
-  const authClient = passport.authenticate(['client'], { session: false });
+  // const authClient = passport.authenticate(['client'], { session: false });
 
   router.get('', auth, findAll);
   router.get('/profile', auth, findMe);
-  router.post('/profile/send-confirm', authClient, sendConfirm);
+  router.post('/profile/send-confirm', sendConfirm);
   router.post('', createNew);
   router.put('/confirm/:code', confirmEmail);
   router.put('', auth, invalidRequest);

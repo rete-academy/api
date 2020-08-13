@@ -73,7 +73,7 @@ const createNew = async (req, res) => {
       placeholders: {
         TITLE: config.email.welcome.subject,
         CONTENT: config.email.welcome.content,
-        LINK: `${config.default.webUrl}/confirm/${confirm.code}`,
+        LINK: `${process.env.WEB_URL}/confirm/${confirm.code}`,
         CODE: confirm.code,
       },
       type: 'welcome',
@@ -90,17 +90,21 @@ const createNew = async (req, res) => {
 
 const sendConfirm = async (req, res) => {
   try {
-    const email = checkRole(req.user, 'admin') ? req.body.email : req.user.email;
+    const { email } = req.body;
     if (!email) throw new TypeError('Email is required.');
+
     const foundUser = await User.findByEmail(email);
+
     if (!foundUser) throw new TypeError('Can not find user account');
-    // Delete the confirmation code linked with user email (if anh)
+
+    // Delete the confirmation code linked with user email (if any)
     await confirmationCode.removeByEmail(foundUser.email);
     //  Create new confirmation code.
     const newConfirm = await confirmationCode.createNew({
       userId: foundUser._id,
       email: foundUser.email,
     });
+
     // Send email to notify user. Need fall back solution if sending fail
     await emailService.sendMail({
       from: config.email.noreply,
@@ -110,7 +114,7 @@ const sendConfirm = async (req, res) => {
       placeholders: {
         TITLE: config.email.welcome.subject,
         CONTENT: config.email.welcome.content,
-        LINK: `${config.default.webUrl}/confirm/${newConfirm.code}`,
+        LINK: `${process.env.WEB_URL}/confirm/${newConfirm.code}`,
         CODE: newConfirm.code,
       },
       type: 'welcome',
@@ -128,10 +132,10 @@ const confirmEmail = async (req, res) => {
   try {
     const found = await confirmationCode.findByCode(req.params.code);
     if (found.length <= 0 || confirmationCode.isExpired(found[0])) {
-      // return new Error('Confirmation code used, expired or not found.');
       defaultResponse(req, res, 404, 'Confirmation code invalid');
       return;
     }
+
     const confirmedUser = await User.findOneAndUpdate(
       { _id: found[0].userId },
       {
@@ -141,9 +145,10 @@ const confirmEmail = async (req, res) => {
           'meta.confirm': true,
         },
       },
-      { new: true },
     );
+
     await confirmationCode.removeByUserId(confirmedUser._id);
+
     defaultResponse(req, res, 201, 'Your email is confirmed!');
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
