@@ -27,22 +27,22 @@ class EmailService {
   }) {
     log.silly(`Start sending email to: ${to}`);
 
-    return async () => {
-      let html = '';
+    let html = '';
 
-      switch (type) {
-        case 'admin':
-          html = await fs.readFile(adminTemplate); break;
-        case 'general':
-          html = await fs.readFile(generalTemplate); break;
-        case 'welcome':
-          html = await fs.readFile(welcomeTemplate); break;
-        case 'reset':
-          html = await fs.readFile(resetTemplate); break;
-        default:
-          html = await fs.readFile(generalTemplate); break;
-      }
+    switch (type) {
+      case 'admin':
+        html = fs.readFileSync(adminTemplate); break;
+      case 'general':
+        html = fs.readFileSync(generalTemplate); break;
+      case 'welcome':
+        html = fs.readFileSync(welcomeTemplate); break;
+      case 'reset':
+        html = fs.readFileSync(resetTemplate); break;
+      default:
+        html = fs.readFileSync(generalTemplate); break;
+    }
 
+    return new Promise((resolve, reject) => {
       const keys = Object.keys(placeholders);
 
       keys.forEach((key) => {
@@ -59,14 +59,14 @@ class EmailService {
         if (error) {
           log.error(error.message);
           log.silly(`Sent email to ${to} failed.`);
-          return error;
+          reject(error);
+        } else {
+          log.debug(info);
+          log.silly(`Sent email to ${to} successfully.`);
+          resolve(info);
         }
-
-        log.debug(info);
-        log.silly(`Sent email to ${to} successfully.`);
-        return info;
       });
-    };
+    });
   }
 }
 
