@@ -43,7 +43,7 @@ schemaInstance.virtual('password').set(function (password) {
 
 const modelInstance = mongoose.model('user', schemaInstance);
 
-modelInstance.findAll = async (query) => {
+modelInstance.search = async (query) => {
   log.silly('Start finding all users');
 
   return modelInstance.find(query)
@@ -64,17 +64,12 @@ modelInstance.findById = (id) => {
     });
 };
 
-modelInstance.findByUsername = (username) => {
+modelInstance.findByUsername = async (username) => {
   log.silly(`Start finding user by username: ${username}`);
 
   return modelInstance.findOne({ username })
-    .then((result) => {
-      log.silly(`User with ${username} found.`);
-      return Promise.resolve(result);
-    }).catch((error) => {
-      log.error(error.message);
-      return Promise.reject(error.message);
-    });
+    .populate('enrolled')
+    .populate('progress');
 };
 
 modelInstance.findByEmail = async (email) => {

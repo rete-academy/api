@@ -1,19 +1,20 @@
 const router = require('express').Router();
 const {
-  invalidRequest,
   confirmEmail,
-  enroll,
-  unenroll,
-  increaseProgress,
-  decreaseProgress,
-  findAll,
-  findMe,
-  uploadAvatar,
-  updateUser,
-  updateStatus,
   createNew,
+  decreaseProgress,
+  enroll,
+  findAll,
+  findByUsername,
+  findMe,
+  increaseProgress,
+  invalidRequest,
   remove,
   sendConfirm,
+  unenroll,
+  updateStatus,
+  updateUser,
+  uploadAvatar,
 } = require('controllers/users');
 const { uploadToS3 } = require('library/aws');
 // const { googleAuth } = require('library/google');
@@ -24,6 +25,7 @@ module.exports = function (passport) {
 
   router.get('', auth, findAll);
   router.get('/profile', auth, findMe);
+  router.get('/:username', auth, findByUsername);
   router.post('/profile/send-confirm', sendConfirm);
   router.post('', createNew);
   router.put('/confirm/:code', confirmEmail);

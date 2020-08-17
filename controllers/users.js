@@ -19,7 +19,7 @@ const invalidRequest = (req, res) => {
 // Make this become search/pagination because findAll is dangerous
 const findAll = async (req, res) => {
   try {
-    const allUsers = await User.findAll(req.query);
+    const allUsers = await User.search();
     defaultResponse(req, res, 200, filterUserData(req.user, allUsers));
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -32,7 +32,23 @@ const findMe = async (req, res) => {
     const me = await User
       .findOne({ email: req.user.email })
       .populate('enrolled');
+
     defaultResponse(req, res, 200, { profile: me });
+  } catch (error) {
+    log.error(`${error.name}: ${error.message}`);
+    defaultResponse(req, res, error.httpStatusCode, error.message);
+  }
+};
+
+const findByUsername = async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (checkRole(req.user, 'teacher')) {
+      const found = await User.findByUsername(username);
+      defaultResponse(req, res, 200, found);
+    } else {
+      defaultResponse(req, res, 403);
+    }
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -144,6 +160,7 @@ const confirmEmail = async (req, res) => {
       { _id: found[0].userId },
       {
         $set: {
+          role: [2],
           email: found[0].email,
           updatedTime: Date.now(),
           'meta.confirm': true,
@@ -283,18 +300,19 @@ const remove = async (req, res) => {
 };
 
 module.exports = {
-  invalidRequest,
-  findAll,
-  findMe,
-  enroll,
-  unenroll,
-  increaseProgress,
-  decreaseProgress,
-  uploadAvatar,
-  createNew,
-  updateUser,
-  sendConfirm,
   confirmEmail,
-  updateStatus,
+  createNew,
+  decreaseProgress,
+  enroll,
+  findAll,
+  findByUsername,
+  findMe,
+  increaseProgress,
+  invalidRequest,
   remove,
+  sendConfirm,
+  unenroll,
+  updateStatus,
+  updateUser,
+  uploadAvatar,
 };

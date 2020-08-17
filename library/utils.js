@@ -97,7 +97,7 @@ function filterUserData(auth, results) {
   if (auth.email) { // only allow registered user
     return results.filter((o) => Math.min(...o.role) >= Math.min(...auth.role));
   }
-  return 'Not allowed';
+  return [];
 }
 
 function checkAuthor(user, data) {
