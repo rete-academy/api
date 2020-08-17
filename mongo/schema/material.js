@@ -37,6 +37,10 @@ module.exports = {
       version: 1,
     },
   },
+  status: {
+    type: String,
+    default: 'public',
+  },
   createdTime: {
     type: Date,
     default: Date.now,

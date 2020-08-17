@@ -29,7 +29,9 @@ const findAll = async (req, res) => {
 
 const findMe = async (req, res) => {
   try {
-    const me = await User.findOne({ email: req.user.email });
+    const me = await User
+      .findOne({ email: req.user.email })
+      .populate('enrolled');
     defaultResponse(req, res, 200, { profile: me });
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -40,6 +42,8 @@ const findMe = async (req, res) => {
 const createNew = async (req, res) => {
   try {
     const user = req.body;
+    // do not allow create new user with higher role
+    user.role = [3];
 
     if (!user.username) {
       user.username = `${slugify(user.name)}${randomize('a0', 6)}`;

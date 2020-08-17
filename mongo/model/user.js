@@ -47,7 +47,7 @@ modelInstance.findAll = async (query) => {
   log.silly('Start finding all users');
 
   return modelInstance.find(query)
-    .populate('enroll')
+    .populate('enrolled')
     .populate('progress');
 };
 
