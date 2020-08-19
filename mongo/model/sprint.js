@@ -1,26 +1,24 @@
 const mongoose = require('mongoose');
 const { isArray } = require('library/utils');
 const log = require('library/logger');
-const modelName = require('path').basename(__filename).slice(0, -3);
+const schemaDefinition = require('../schema/sprint');
 
 const refine = function (doc, ret) {
   delete ret.__v;
   return ret;
 };
 
-const schemaDefinition = require(`../schema/${modelName}`);
 const schemaInstance = mongoose.Schema(schemaDefinition, {
-  collection: `${modelName}s`,
   toObject: { transform: refine },
-  toJSON: { transform: refine },
+  toJSON: { transform: refine, virtuals: true },
   minimize: false,
 });
 
-const modelInstance = mongoose.model(modelName, schemaInstance);
+const modelInstance = mongoose.model('sprint', schemaInstance);
 
 modelInstance.findAll = async function (query) {
   try {
-    log.silly(`Finding ${modelName}`);
+    log.silly('Finding sprint');
     return await modelInstance.find(query)
       .sort({ name: 1 })
       .populate('materials');
@@ -32,7 +30,7 @@ modelInstance.findAll = async function (query) {
 
 modelInstance.findById = async function (id) {
   try {
-    log.silly(`Start finding ${modelName} with id ${id}`);
+    log.silly(`Start finding sprint with id ${id}`);
     return await modelInstance.findOne({ _id: id });
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -42,7 +40,7 @@ modelInstance.findById = async function (id) {
 
 modelInstance.createNew = async function (obj) {
   try {
-    log.silly(`Creating a new ${modelName}`);
+    log.silly('Creating a new sprint');
     return await modelInstance.create(obj);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
@@ -58,7 +56,7 @@ modelInstance.createNew = async function (obj) {
  */
 modelInstance.updateById = async function (id, doc) {
   try {
-    log.silly(`Updating a ${modelName} with id ${id}`);
+    log.silly(`Updating a sprint with id ${id}`);
     const data = { ...doc };
     delete data._id;
     delete data.__v;
@@ -82,7 +80,7 @@ modelInstance.updateById = async function (id, doc) {
 
 modelInstance.addMaterials = async function (id, doc) {
   try {
-    log.silly(`Adding materials to ${modelName} id ${id}`);
+    log.silly(`Adding materials to sprint id ${id}`);
     const data = isArray(doc.id) ? doc.id : [doc.id];
     const found = await modelInstance.findOne({ _id: id });
     const materialIds = found.materials.map((i) => i.toString());
@@ -104,7 +102,7 @@ modelInstance.addMaterials = async function (id, doc) {
 
 modelInstance.removeMaterials = async function (id, doc) {
   try {
-    log.silly(`Removing materials from ${modelName} id ${id}`);
+    log.silly(`Removing materials from sprint id ${id}`);
     const data = isArray(doc.id) ? doc.id : [doc.id];
     const found = await modelInstance.findOne({ _id: id });
     const materialIds = found.materials.map((i) => i.toString());
@@ -126,7 +124,7 @@ modelInstance.removeMaterials = async function (id, doc) {
 
 modelInstance.removeById = async function (id) {
   try {
-    log.silly(`Start remove a ${modelName} with id ${id}`);
+    log.silly(`Start remove a sprint with id ${id}`);
     return await modelInstance.findOneAndDelete({ _id: id });
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);

@@ -8,7 +8,6 @@ const confirmationCode = require('mongo/model/confirmation_code');
 const {
   checkRole,
   defaultResponse,
-  filterUserData,
   slugify,
 } = require('library/utils');
 
@@ -20,7 +19,7 @@ const invalidRequest = (req, res) => {
 const findAll = async (req, res) => {
   try {
     const allUsers = await User.search();
-    defaultResponse(req, res, 200, filterUserData(req.user, allUsers));
+    defaultResponse(req, res, 200, allUsers);
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);
     defaultResponse(req, res, error.httpStatusCode, error.message);
@@ -29,10 +28,7 @@ const findAll = async (req, res) => {
 
 const findMe = async (req, res) => {
   try {
-    const me = await User
-      .findOne({ email: req.user.email })
-      .populate('enrolled');
-
+    const me = await User.findByEmail(req.user.email);
     defaultResponse(req, res, 200, { profile: me });
   } catch (error) {
     log.error(`${error.name}: ${error.message}`);

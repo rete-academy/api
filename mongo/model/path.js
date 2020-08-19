@@ -5,15 +5,24 @@ const log = require('library/logger');
 
 const schemaDefinition = require('../schema/path');
 
-const transform = function (doc, ret) {
+const refine = function (doc, ret) {
   delete ret.__v;
   return ret;
 };
 
 const schemaInstance = mongoose.Schema(schemaDefinition, {
-  toObject: { transform },
-  toJSON: { transform },
+  toObject: { transform: refine },
+  toJSON: { transform: refine, virtuals: true },
   minimize: false,
+});
+
+schemaInstance.virtual('materialTotal').get(function () {
+  return this.sprints.reduce((acc, cur) => {
+    if (cur.materials) {
+      return acc + cur.materials.length;
+    }
+    return acc;
+  }, 0);
 });
 
 const modelInstance = mongoose.model('path', schemaInstance);
@@ -25,7 +34,6 @@ modelInstance.findAll = async function (query) {
     return await modelInstance.find(query)
       .sort({ name: 1 })
       .populate('authors')
-      .populate('sprints')
       .populate({
         path: 'sprints',
         populate: { path: 'materials' },

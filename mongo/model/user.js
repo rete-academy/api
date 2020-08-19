@@ -47,39 +47,56 @@ modelInstance.search = async (query) => {
   log.silly('Start finding all users');
 
   return modelInstance.find(query)
-    .populate('enrolled')
+    .populate({
+      path: 'enrolled',
+      populate: {
+        path: 'sprints',
+        populate: { path: 'materials' },
+      },
+    })
     .populate('progress');
 };
 
-modelInstance.findById = (id) => {
+modelInstance.findById = async (id) => {
   log.silly(`Start finding user with id: ${id}`);
 
   return modelInstance.findOne({ _id: id })
-    .then((result) => {
-      log.silly('Found user.');
-      return Promise.resolve(result);
-    }).catch((error) => {
-      log.error(`${error.name}: ${error.message}`);
-      return Promise.reject(error.message);
-    });
+    .populate({
+      path: 'enrolled',
+      populate: {
+        path: 'sprints',
+        populate: { path: 'materials' },
+      },
+    })
+    .populate('progress');
 };
 
 modelInstance.findByUsername = async (username) => {
   log.silly(`Start finding user by username: ${username}`);
 
   return modelInstance.findOne({ username })
-    .populate('enrolled')
+    .populate({
+      path: 'enrolled',
+      populate: {
+        path: 'sprints',
+        populate: { path: 'materials' },
+      },
+    })
     .populate('progress');
 };
 
 modelInstance.findByEmail = async (email) => {
-  try {
-    log.silly(`Start finding user by email: ${email}`);
-    return await modelInstance.findOne({ email });
-  } catch (error) {
-    log.error(`${error.name}: ${error.message}`);
-    throw error;
-  }
+  log.silly(`Start finding user by email: ${email}`);
+
+  return modelInstance.findOne({ email })
+    .populate({
+      path: 'enrolled',
+      populate: {
+        path: 'sprints',
+        populate: { path: 'materials' },
+      },
+    })
+    .populate('progress');
 };
 
 modelInstance.createNew = async (user) => {
