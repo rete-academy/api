@@ -41,7 +41,7 @@ module.exports.forgot = async (req, res) => {
       placeholders: {
         TITLE: config.email.reset.subject,
         CONTENT: config.email.reset.content,
-        LINK: `${config.default.webUrl}/password/reset?token=${newPassword.token}`,
+        LINK: `${process.env.WEB_URL}/password/reset?token=${newPassword.token}`,
         CODE: newPassword.token,
       },
       type: 'reset',
